@@ -23,7 +23,6 @@
 #include <attributes.h>
 
 /**
- * @fn mem_alloc
  * @brief Allocates a buffer of the given size in the heap.
  *
  * The allocated buffer is aligned on 64 bits, in order to ensure compatibility
@@ -38,7 +37,6 @@ void *
 mem_alloc(size_t size);
 
 /**
- * @fn mem_reset
  * @brief Resets the heap.
  *
  * Every allocated buffer becomes invalid, since subsequent allocations restart from the beginning

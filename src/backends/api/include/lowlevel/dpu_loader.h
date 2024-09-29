@@ -9,9 +9,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <dpu_types.h>
-#include <dpu_error.h>
 #include <dpu_elf.h>
+#include <dpu_error.h>
+#include <dpu_types.h>
+
+struct dpu_rank_t;
+struct dpu_t;
 
 /**
  * @file dpu_loader.h

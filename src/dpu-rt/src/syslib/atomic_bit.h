@@ -15,6 +15,7 @@
 #include <macro_utils.h>
 #include <attributes.h>
 
+/// @cond INTERNAL
 #define ATOMIC_BIT_GET(_name) __CONCAT(__atomic_bit_, _name)
 #define ATOMIC_BIT_INIT(_name) uint8_t __atomic_bit ATOMIC_BIT_GET(_name)
 #define ATOMIC_BIT_EXTERN(_name) extern ATOMIC_BIT_INIT(_name)
@@ -31,5 +32,6 @@ extern uint8_t __atomic_start_addr;
 #define ATOMIC_BIT_ACQUIRE(_name) __asm__ volatile("acquire zero, %[abit], nz, ." : : [abit] "i"(&ATOMIC_BIT_GET(_name)))
 
 #define ATOMIC_BIT_RELEASE(_name) __asm__ volatile("release zero, %[abit], nz, .+1" : : [abit] "i"(&ATOMIC_BIT_GET(_name)))
+/// @endcond
 
 #endif /* DPUSYSCORE_ATOMIC_BIT_H */

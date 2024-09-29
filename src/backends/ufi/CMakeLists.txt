@@ -16,6 +16,7 @@ set( COMMONS_INCLUDE_DIRECTORIES ../commons/include/ ../commons/src/properties .
 set( UFI_SOURCES
         src/ufi_bit_config.c
         src/ufi_dma_wavegen_config.c
+        src/ufi_bank_interface_pmc.c
         src/ufi.c
         src/ufi_ci.c
 

@@ -6,10 +6,16 @@
 #ifndef DPU_MANAGEMENT_H
 #define DPU_MANAGEMENT_H
 
-#include <dpu_error.h>
+#include <stdbool.h>
+#include <stdint.h>
+
 #include <dpu_description.h>
-#include <dpu_types.h>
+#include <dpu_error.h>
 #include <dpu_macro_utils.h>
+#include <dpu_types.h>
+
+struct dpu_rank_t;
+struct dpu_t;
 
 /**
  * @file dpu_management.h
@@ -20,11 +26,10 @@
  * @brief Fetch the description of the given profile.
  * @param profile the profile precising configuration
  * @param description storage for the description
- * @param rank_id rank_id of the rank
  * @return Whether the operation was successful.
  */
 dpu_error_t
-dpu_get_profile_description(const char *profile, dpu_description_t *description, dpu_rank_id_t rank_id);
+dpu_get_profile_description(const char *profile, dpu_description_t *description);
 
 /**
  * @brief Allocates a rank of DPUs.

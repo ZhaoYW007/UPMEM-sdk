@@ -23,14 +23,24 @@ dpu_thread_job_type_to_string(enum dpu_thread_job_type job_type)
             return "launch_dpu";
         case DPU_THREAD_JOB_SYNC:
             return "synchronization";
+        case DPU_THREAD_JOB_SYNC_PARALLEL:
+            return "synchronization parallel";
         case DPU_THREAD_JOB_COPY_WRAM_TO_MATRIX:
             return "copy_wram_to_matrix";
+        case DPU_THREAD_JOB_PARALLEL_COPY_WRAM_TO_MATRIX:
+            return "parallel_copy_wram_to_matrix";
+        case DPU_THREAD_JOB_PARALLEL_FIFO_PUSH:
+            return "parallel_copy_wram_to_fifo";
         case DPU_THREAD_JOB_COPY_IRAM_TO_MATRIX:
             return "copy_iram_to_matrix";
         case DPU_THREAD_JOB_COPY_MRAM_TO_MATRIX:
             return "copy_mram_to_matrix";
         case DPU_THREAD_JOB_COPY_WRAM_FROM_MATRIX:
             return "copy_wram_from_matrix";
+        case DPU_THREAD_JOB_PARALLEL_COPY_WRAM_FROM_MATRIX:
+            return "parallel_copy_wram_from_matrix";
+        case DPU_THREAD_JOB_PARALLEL_FIFO_FLUSH:
+            return "parallel_copy_wram_from_fifo";
         case DPU_THREAD_JOB_COPY_IRAM_FROM_MATRIX:
             return "copy_iram_from_matrix";
         case DPU_THREAD_JOB_COPY_MRAM_FROM_MATRIX:
@@ -76,6 +86,10 @@ dpu_error_to_string_switch(dpu_error_t status)
             return "invalid iram access";
         case DPU_ERR_MRAM_BUSY:
             return "mram is busy";
+        case DPU_ERR_INVALID_PARALLEL_MEMORY_TRANSFER:
+            return "invalid parallel transfer (should be to/from WRAM)";
+        case DPU_ERR_WRAM_FIFO_FULL:
+            return "cannot push to WRAM FIFO, FIFO full";
         case DPU_ERR_INVALID_MRAM_ACCESS:
             return "invalid mram access";
         case DPU_ERR_CORRUPTED_MEMORY:

@@ -9,11 +9,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <dpu_types.h>
-#include <dpu_target.h>
-#include <dpu_chip_id.h>
-
 #include <dpu_hw_description.h>
+#include <dpu_target.h>
+#include <dpu_types.h>
 
 /**
  * @file dpu_description.h
@@ -28,9 +26,6 @@ typedef struct _dpu_description_t {
     struct dpu_hw_description_t hw;
     /** Backend type for the DPU rank. */
     dpu_type_t type;
-
-    /** Rank index used at allocation time */
-    dpu_rank_id_t rank_handler_allocator_id;
 
     /** Configuration for various parameters on the DPU rank. */
     struct {

@@ -221,7 +221,7 @@ fill_address_translation_backend(hw_dpu_rank_allocation_parameters_t params, dpu
     return true;
 }
 
-__attribute__((used)) static void
+__attribute__((used)) static int
 hw_set_debug_mode(struct dpu_rank_t *rank, uint8_t mode)
 {
     hw_dpu_rank_allocation_parameters_t params = _this_params(rank->description);
@@ -230,6 +230,8 @@ hw_set_debug_mode(struct dpu_rank_t *rank, uint8_t mode)
     ret = ioctl(params->rank_fs.fd_rank, DPU_RANK_IOCTL_DEBUG_MODE, mode);
     if (ret)
         LOG_RANK(WARNING, rank, "Failed to change debug mode (%s)", strerror(errno));
+
+    return ret;
 }
 
 static void
@@ -460,6 +462,9 @@ hw_allocate(struct dpu_rank_t *rank, dpu_description_t description)
     rank->_internals = rank_context;
 
     params->dpu_chip_id = dpu_sysfs_get_dpu_chip_id(&params->rank_fs);
+
+    // retrieve ci_mask from sysfs
+    description->hw.topology.ci_mask = dpu_sysfs_get_ci_mask(&params->rank_fs);
 
     if (params->dpu_chip_id != description->hw.signature.chip_id) {
         LOG_RANK(
@@ -820,9 +825,6 @@ hw_fill_description_from_profile(dpu_properties_t properties, dpu_description_t 
     uint8_t chip_id, capabilities_mode;
     bool bypass_module_compatibility;
 
-    /*Need to keep the rank_id value because fill_description_with_default_values_for will fill description with default values */
-    dpu_rank_id_t rank_handler_allocator_id = description->rank_handler_allocator_id;
-
     parameters = malloc(sizeof(*parameters));
     if (!parameters) {
         return DPU_RANK_SYSTEM_ERROR;
@@ -834,10 +836,7 @@ hw_fill_description_from_profile(dpu_properties_t properties, dpu_description_t 
         return DPU_RANK_SYSTEM_ERROR;
     }
 
-    /*Restore the parameter rank_handler_allocator_id with the rank_id*/
     validate(fill_description_with_default_values_for((dpu_chip_id_e)chip_id, description));
-
-    description->rank_handler_allocator_id = rank_handler_allocator_id;
 
     ret = dpu_sysfs_get_hardware_description(description, &capabilities_mode);
     if (ret == -1) {

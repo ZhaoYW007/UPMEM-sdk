@@ -18,6 +18,8 @@
 #include <dpu_error.h>
 #include <dpu_types.h>
 #include <dpu_macro_utils.h>
+#include <dpu_fifo.h>
+#include <dpu_bank_interface_pmc.h>
 // IWYU pragma: end_exports
 
 /**
@@ -81,6 +83,13 @@ typedef enum _dpu_xfer_flags_t {
      * enqueue in the asynchronous job list of the rank(s).
      */
     DPU_XFER_ASYNC = 1 << 1,
+    /**
+     * The memory transfer is scheduled in parallel of the DPU execution, it
+     * does not need to wait for the DPU to finish. This is supported for WRAM transfer only.
+     * @warning there is no synchronization between the host and the DPU for this
+     * transfer. The user needs to take care of it.
+     **/
+    DPU_XFER_PARALLEL = 1 << 2,
 } dpu_xfer_flags_t;
 
 /**
@@ -121,6 +130,11 @@ typedef enum _dpu_callback_flags_t {
      * Callback must be asynchronous and non-blocking for this to have an effect.
      */
     DPU_CALLBACK_SINGLE_CALL = 1 << 2,
+    /**
+     * The callback is scheduled in parallel of the DPU execution, it
+     * does not need to wait for the DPU to finish.
+     **/
+    DPU_CALLBACK_PARALLEL = 1 << 3,
 } dpu_callback_flags_t;
 
 /**
@@ -640,6 +654,35 @@ dpu_broadcast_to_symbol(struct dpu_set_t dpu_set,
     const void *src,
     size_t length,
     dpu_xfer_flags_t flags);
+
+/**
+ * @brief Set the specified buffer to be transfered for the next DPU FIFO transfer
+ *
+ * @param dpu_set the identifier of the DPU set
+ * @param fifo_link the link to the DPU FIFOs
+ * @param buffer pointer to the host buffer
+ * @return Whether the operation was successful.
+ */
+dpu_error_t
+dpu_fifo_prepare_xfer(struct dpu_set_t dpu_set, struct dpu_fifo_link_t *fifo_link, void *buffer);
+
+/**
+ * @brief Execute the memory transfer on the DPU FIFOs
+ *
+ * Use the host buffers previously defined by `dpu_fifo_prepare_xfer`.
+ * When reading memory from the DPUs, if a host buffer is used for multiple DPUs, no error will be reported, and the buffer
+ * contents are undefined.
+ *
+ * If the transfer is to the DPU FIFOs (input FIFO link), one element is transfered at a time
+ * If the transfer is from the DPU FIFOs (output FIFO link), all elements are transfered at a time (the output FIFO is emptied)
+ *
+ * @param dpu_set the identifier of the DPU set
+ * @param fifo_link the link to the DPU FIFOs
+ * @param flags options of the transfer
+ * @return Whether the operation was successful.
+ */
+dpu_error_t
+dpu_fifo_push_xfer(struct dpu_set_t dpu_set, struct dpu_fifo_link_t *fifo_link, dpu_xfer_flags_t flags);
 
 /**
  * @brief Execute a user-defined function with the given DPU set as argument

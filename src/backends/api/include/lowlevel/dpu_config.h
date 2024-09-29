@@ -6,10 +6,10 @@
 #ifndef DPU_CONFIG_H
 #define DPU_CONFIG_H
 
-#include <stdint.h>
-
-#include <dpu_types.h>
 #include <dpu_error.h>
+
+struct dpu_rank_t;
+struct dpu_t;
 
 /**
  * @file dpu_config.h
@@ -19,7 +19,7 @@
 /**
  * @brief Reset the given DPU rank.
  * @param rank the DPU rank
- * @return Whether the operation was succesful.
+ * @return Whether the operation was successful.
  */
 dpu_error_t
 dpu_reset_rank(struct dpu_rank_t *rank);
@@ -27,7 +27,7 @@ dpu_reset_rank(struct dpu_rank_t *rank);
 /**
  * @brief Reset the given DPU.
  * @param dpu the DPU
- * @return Whether the operation was succesful.
+ * @return Whether the operation was successful.
  */
 dpu_error_t
 dpu_reset_dpu(struct dpu_t *dpu);

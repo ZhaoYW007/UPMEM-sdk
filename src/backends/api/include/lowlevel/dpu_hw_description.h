@@ -10,6 +10,9 @@
 #ifndef DPU_HW_DESCRIPTION_H
 #define DPU_HW_DESCRIPTION_H
 
+#include <dpu_chip_id.h>
+#include <dpu_types.h>
+
 /**
  * @file dpu_hw_description.h
  * @brief Hardware DPU rank description.

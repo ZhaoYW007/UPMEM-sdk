@@ -6,12 +6,14 @@
 #ifndef DPU_PROGRAM_H
 #define DPU_PROGRAM_H
 
+#include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 
-#include <dpu_types.h>
-#include <dpu_error.h>
 #include <dpu_elf.h>
+#include <dpu_error.h>
+#include <dpu_types.h>
+
+struct dpu_t;
 
 /**
  * @file dpu_program.h
@@ -122,5 +124,13 @@ dpu_load_elf_program_from_memory(dpu_elf_file_t *elf_info,
  */
 dpu_error_t
 dpu_load_elf_program(dpu_elf_file_t *elf_info, const char *path, struct dpu_program_t *program, mram_size_t mram_size_hint);
+
+/**
+ * @param dpu_set the DPU set
+ * @param program information on the ELF program stored when loading
+ * @return Whether the operation was successful.
+ */
+dpu_error_t
+dpu_get_common_program(struct dpu_set_t *dpu_set, struct dpu_program_t **program);
 
 #endif // DPU_PROGRAM_H

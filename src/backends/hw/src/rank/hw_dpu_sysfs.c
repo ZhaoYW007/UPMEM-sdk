@@ -375,27 +375,21 @@ dpu_sysfs_get_hardware_description(dpu_description_t description, uint8_t *capab
 {
     struct udev_list_entry *dev_rank_list_entry;
     struct dpu_rank_fs rank_fs;
-    uint32_t wanted_rank_id = description->rank_handler_allocator_id;
-    bool node_found = false;
+
     init_udev_enumerator(rank_fs.udev.enumerate, rank_fs.udev.udev, NULL, "dpu_rank", NULL, rank_fs.udev.devices, end);
-    /*Loop over each device node until we found the rank with the good rank_id*/
+
     udev_list_entry_foreach(dev_rank_list_entry, rank_fs.udev.devices)
     {
         const char *path_rank;
 
         path_rank = udev_list_entry_get_name(dev_rank_list_entry);
         rank_fs.udev.dev = udev_device_new_from_syspath(rank_fs.udev.udev, path_rank);
-        uint32_t rank_id = dpu_sysfs_get_rank_id(&rank_fs);
-        if (rank_id != wanted_rank_id) {
-            continue;
-        }
-        node_found = true;
+
         /* Get the real topology from the driver */
         uint8_t clock_division;
         uint32_t fck_frequency_in_mhz;
         description->hw.topology.nr_of_dpus_per_control_interface = dpu_sysfs_get_nb_dpus_per_ci(&rank_fs);
         description->hw.topology.nr_of_control_interfaces = dpu_sysfs_get_nb_ci(&rank_fs);
-        description->hw.topology.ci_mask = dpu_sysfs_get_ci_mask(&rank_fs);
         description->hw.memories.mram_size = dpu_sysfs_get_mram_size(&rank_fs);
         clock_division = dpu_sysfs_get_clock_division(&rank_fs);
         fck_frequency_in_mhz = dpu_sysfs_get_fck_frequency(&rank_fs);
@@ -413,13 +407,10 @@ dpu_sysfs_get_hardware_description(dpu_description_t description, uint8_t *capab
     }
     udev_enumerate_unref(rank_fs.udev.enumerate);
     udev_unref(rank_fs.udev.udev);
-    if (!node_found) {
-        goto end;
-    }
+
     return 0;
 
 end:
-    // LOG_FN(WARNING, "Fail to retrieve hw description for rank_id %d", description->rank_handler_allocator_id);
     return -1;
 }
 

@@ -266,7 +266,6 @@ dpu_rank_handler_get_rank(struct dpu_rank_t *rank, dpu_rank_handler_context_t ha
     }
     *description = (struct _dpu_description_t) { 0 };
 
-    description->rank_handler_allocator_id = rank->rank_handler_allocator_id;
     status = handler_context->handler->fill_description_from_profile(properties, description);
     if (status != DPU_RANK_SUCCESS) {
         free(description);

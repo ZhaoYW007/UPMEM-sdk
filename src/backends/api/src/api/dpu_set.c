@@ -740,6 +740,8 @@ dpu_callback(struct dpu_set_t dpu_set,
             ranks = &rank;
             use_initial_dpu_set = true;
             break;
+        default:
+            return DPU_ERR_INTERNAL;
     }
 
     if (is_single_call && is_sync) {
@@ -751,6 +753,8 @@ dpu_callback(struct dpu_set_t dpu_set,
     struct dpu_thread_job_sync sync_job;
     uint32_t nr_jobs_per_rank;
     enum dpu_thread_job_type job_type = DPU_THREAD_JOB_CALLBACK;
+    if (flags & DPU_CALLBACK_PARALLEL)
+        job_type = DPU_THREAD_JOB_CALLBACK_PARALLEL;
 
     DPU_THREAD_JOB_GET_JOBS(ranks, nr_ranks, nr_jobs_per_rank, jobs, &sync_job, is_sync, status);
 
@@ -801,7 +805,7 @@ dpu_callback(struct dpu_set_t dpu_set,
             job->callback.master_job = master_job;
         }
     } else {
-        DPU_THREAD_JOB_SET_JOBS(ranks, rank, nr_ranks, jobs, job, &sync_job, is_sync, {
+        DPU_THREAD_JOB_SET_JOBS_PARALLEL(ranks, rank, nr_ranks, jobs, job, &sync_job, is_sync, flags & DPU_CALLBACK_PARALLEL, {
             job->type = job_type;
             job->callback.master_job = NULL;
             job->callback.function = callback;

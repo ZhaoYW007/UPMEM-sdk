@@ -211,7 +211,27 @@ dpu_transfer_to_string(dpu_xfer_t transfer)
     }
 }
 
-static dpu_error_t
+static bool
+check_dpu_program(struct dpu_t *dpu, struct dpu_program_t **the_program)
+{
+
+    if (!dpu_is_enabled(dpu)) {
+        return true;
+    }
+
+    struct dpu_program_t *dpu_program = dpu_get_program(dpu);
+
+    if (*the_program == NULL) {
+        *the_program = dpu_program;
+    }
+
+    if (*the_program != dpu_program) {
+        return false;
+    }
+    return true;
+}
+
+dpu_error_t
 dpu_get_common_program(struct dpu_set_t *dpu_set, struct dpu_program_t **program)
 {
     struct dpu_program_t *the_program = NULL;
@@ -227,19 +247,8 @@ dpu_get_common_program(struct dpu_set_t *dpu_set, struct dpu_program_t **program
                     for (int each_dpu = 0; each_dpu < nr_dpus_per_ci; ++each_dpu) {
                         struct dpu_t *dpu = DPU_GET_UNSAFE(rank, each_ci, each_dpu);
 
-                        if (!dpu_is_enabled(dpu)) {
-                            continue;
-                        }
-
-                        struct dpu_program_t *dpu_program = dpu_get_program(dpu);
-
-                        if (the_program == NULL) {
-                            the_program = dpu_program;
-                        }
-
-                        if (the_program != dpu_program) {
+                        if (!check_dpu_program(dpu, &the_program))
                             return DPU_ERR_DIFFERENT_DPU_PROGRAMS;
-                        }
                     }
                 }
             }
@@ -772,12 +781,32 @@ dpu_push_xfer_symbol(struct dpu_set_t dpu_set,
             DPU_COPY_MATRIX_SET_JOB_TYPE(job_type, xfer, address, length);
 
             uint32_t nr_jobs_per_rank;
+            bool is_parallel = false;
+            if (flags & DPU_XFER_PARALLEL) {
+                // this is a memory transfer to execute
+                // in parallel of DPU execution
+                // This is only possible if the transfer is in WRAM
+                // return an error if not
+                switch (job_type) {
+                    case DPU_THREAD_JOB_COPY_WRAM_FROM_MATRIX:
+                        job_type = DPU_THREAD_JOB_PARALLEL_COPY_WRAM_FROM_MATRIX;
+                        is_parallel = true;
+                        break;
+                    case DPU_THREAD_JOB_COPY_WRAM_TO_MATRIX:
+                        job_type = DPU_THREAD_JOB_PARALLEL_COPY_WRAM_TO_MATRIX;
+                        is_parallel = true;
+                        break;
+                    default:
+                        return DPU_ERR_INVALID_PARALLEL_MEMORY_TRANSFER;
+                }
+            }
+
             struct dpu_thread_job_sync sync;
             DPU_THREAD_JOB_GET_JOBS(ranks, nr_ranks, nr_jobs_per_rank, jobs, &sync, SYNCHRONOUS_FLAGS(flags), status);
 
             struct dpu_rank_t *rank;
             struct dpu_thread_job *job;
-            DPU_THREAD_JOB_SET_JOBS(ranks, rank, nr_ranks, jobs, job, &sync, SYNCHRONOUS_FLAGS(flags), {
+            DPU_THREAD_JOB_SET_JOBS_PARALLEL(ranks, rank, nr_ranks, jobs, job, &sync, SYNCHRONOUS_FLAGS(flags), is_parallel, {
                 dpu_transfer_matrix_copy(&job->matrix, dpu_get_transfer_matrix(rank));
                 job->type = job_type;
                 job->matrix.offset = address;
@@ -801,7 +830,7 @@ dpu_push_xfer_symbol(struct dpu_set_t dpu_set,
             return DPU_ERR_INTERNAL;
     }
 
-    if (flags != DPU_XFER_NO_RESET) {
+    if ((flags & DPU_XFER_NO_RESET) == 0) {
         switch (dpu_set.kind) {
             case DPU_SET_RANKS:
                 for (uint32_t each_rank = 0; each_rank < dpu_set.list.nr_ranks; ++each_rank) {
@@ -812,6 +841,136 @@ dpu_push_xfer_symbol(struct dpu_set_t dpu_set,
             case DPU_SET_DPU: {
                 struct dpu_t *dpu = dpu_set.dpu;
                 dpu_transfer_matrix_clear_dpu(dpu, dpu_get_transfer_matrix(dpu_get_rank(dpu)));
+                break;
+            }
+            default:
+                return DPU_ERR_INTERNAL;
+        }
+    }
+
+    return status;
+}
+
+__API_SYMBOL__ dpu_error_t
+dpu_fifo_prepare_xfer(struct dpu_set_t dpu_set, struct dpu_fifo_link_t *fifo_link, void *buffer)
+{
+    LOG_FN(DEBUG, "%p", buffer);
+    switch (dpu_set.kind) {
+        case DPU_SET_RANKS: {
+
+            struct dpu_set_t dpu;
+            DPU_FOREACH (dpu_set, dpu) {
+
+                struct dpu_t *dpu_ = dpu_from_set(dpu);
+                struct dpu_rank_t *rank = dpu_get_rank(dpu_);
+                struct dpu_fifo_rank_t *fifo = get_rank_fifo(fifo_link, rank);
+                struct dpu_transfer_matrix *matrix = &(fifo->transfer_matrix);
+
+                if (!dpu_is_enabled(dpu_)) {
+                    continue;
+                }
+
+                dpu_transfer_matrix_add_dpu(dpu_, matrix, buffer);
+            }
+            break;
+        }
+        case DPU_SET_DPU: {
+            struct dpu_t *dpu = dpu_set.dpu;
+            struct dpu_rank_t *rank = dpu_get_rank(dpu);
+
+            if (!dpu_is_enabled(dpu)) {
+                return DPU_ERR_DPU_DISABLED;
+            }
+
+            struct dpu_transfer_matrix *matrix = &(get_rank_fifo(fifo_link, rank)->transfer_matrix);
+            dpu_transfer_matrix_add_dpu(dpu, matrix, buffer);
+
+            break;
+        }
+        default:
+            return DPU_ERR_INTERNAL;
+    }
+
+    return DPU_OK;
+}
+
+// TODO we could have the number of elements to be pushed to the DPU (i.e., be able to push several elements at once)
+// TODO Here we could also have a condition that for push from DPU,
+// we do it only if the max number of elements in the output FIFO exceeds a certain threshold.
+// This would avoid transfering empty data
+//
+__API_SYMBOL__ dpu_error_t
+dpu_fifo_push_xfer(struct dpu_set_t dpu_set, struct dpu_fifo_link_t *fifo_link, dpu_xfer_flags_t flags)
+{
+
+    dpu_error_t status = DPU_OK;
+
+    switch (dpu_set.kind) {
+        case DPU_SET_RANKS: {
+
+            uint32_t nr_ranks = 0;
+            struct dpu_rank_t **ranks = 0;
+
+            enum dpu_thread_job_type job_type = DPU_THREAD_JOB_PARALLEL_FIFO_PUSH;
+            if (fifo_link->direction == DPU_OUTPUT_FIFO)
+                job_type = DPU_THREAD_JOB_PARALLEL_FIFO_FLUSH;
+            struct dpu_thread_job_sync sync;
+            uint32_t nr_jobs = 0;
+            nr_ranks = dpu_set.list.nr_ranks;
+            ranks = dpu_set.list.ranks;
+
+            DPU_THREAD_JOB_GET_JOBS(ranks, nr_ranks, nr_jobs, jobs, &sync, SYNCHRONOUS_FLAGS(flags), status);
+
+            struct dpu_rank_t *rank;
+            struct dpu_thread_job *job;
+
+            DPU_THREAD_JOB_SET_JOBS_PARALLEL(ranks, rank, nr_ranks, jobs, job, &sync, SYNCHRONOUS_FLAGS(flags), true, {
+                job->fifo = get_rank_fifo(fifo_link, rank);
+                job->fifo_dpu = NULL;
+                dpu_transfer_matrix_copy(&job->fifo_transfer_matrix, &(get_rank_fifo(fifo_link, rank)->transfer_matrix));
+                job->type = job_type;
+            });
+
+            status = dpu_thread_job_do_jobs(ranks, nr_ranks, nr_jobs, jobs, SYNCHRONOUS_FLAGS(flags), &sync);
+
+        } break;
+        case DPU_SET_DPU: {
+            struct dpu_t *dpu = dpu_set.dpu;
+            struct dpu_rank_t *rank = dpu_get_rank(dpu);
+
+            enum dpu_thread_job_type job_type = DPU_THREAD_JOB_PARALLEL_FIFO_PUSH;
+            struct dpu_thread_job_sync sync;
+            uint32_t nr_jobs_per_rank = 0;
+            DPU_THREAD_JOB_GET_JOBS(&rank, 1, nr_jobs_per_rank, jobs, &sync, SYNCHRONOUS_FLAGS(flags), status);
+
+            struct dpu_rank_t *rrank __attribute__((unused));
+            struct dpu_thread_job *job;
+            DPU_THREAD_JOB_SET_JOBS_PARALLEL(&rank, rrank, 1, jobs, job, &sync, SYNCHRONOUS_FLAGS(flags), true, {
+                job->fifo = get_rank_fifo(fifo_link, rank);
+                job->fifo_dpu = dpu;
+                dpu_transfer_matrix_copy(&job->fifo_transfer_matrix, &(get_rank_fifo(fifo_link, rank)->transfer_matrix));
+                job->type = job_type;
+            });
+
+            status = dpu_thread_job_do_jobs(&rank, 1, nr_jobs_per_rank, jobs, SYNCHRONOUS_FLAGS(flags), &sync);
+
+            break;
+        }
+        default:
+            return DPU_ERR_INTERNAL;
+    }
+
+    if ((flags & DPU_XFER_NO_RESET) == 0) {
+        switch (dpu_set.kind) {
+            case DPU_SET_RANKS:
+                for (uint32_t each_rank = 0; each_rank < dpu_set.list.nr_ranks; ++each_rank) {
+                    struct dpu_rank_t *rank = dpu_set.list.ranks[each_rank];
+                    dpu_transfer_matrix_clear_all(rank, &(get_rank_fifo(fifo_link, rank)->transfer_matrix));
+                }
+                break;
+            case DPU_SET_DPU: {
+                struct dpu_t *dpu = dpu_set.dpu;
+                dpu_transfer_matrix_clear_dpu(dpu, &(get_rank_fifo(fifo_link, dpu_get_rank(dpu))->transfer_matrix));
                 break;
             }
             default:

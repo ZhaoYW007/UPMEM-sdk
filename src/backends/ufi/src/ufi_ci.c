@@ -14,6 +14,7 @@
 #include <ufi_rank_utils.h>
 
 #define NB_RETRY_FOR_VALID_RESULT 100
+#define NB_MAX_CI_COMMIT_CMD_RETRY 2
 
 static void invert_color(struct dpu_rank_t *rank, u8 ci_mask);
 static u8 compute_ci_mask(struct dpu_rank_t *rank, const u64 *commands);
@@ -292,6 +293,7 @@ static u32 exec_cmd(struct dpu_rank_t *rank, u64 *commands,
 	u32 status;
 	bool in_progress, timeout;
 	u32 nr_retries = NB_RETRY_FOR_VALID_RESULT;
+	u32 nr_retry_commit_cmd = NB_MAX_CI_COMMIT_CMD_RETRY;
 
 	if ((status = compute_masks(rank, commands, result_masks, expected,
 				    &ci_mask, add_select_mask, is_done)) !=
@@ -301,6 +303,12 @@ static u32 exec_cmd(struct dpu_rank_t *rank, u64 *commands,
 
 	expected_color = GET_CI_CONTEXT(rank)->color & ci_mask;
 	invert_color(rank, ci_mask);
+
+	// TMP workaround: sometimes we have a CI timeout so we just need to resend the commands (see Jira SW-309)
+	// The commands are well sent to the CI but sometimes acknowledgment seems to be not done
+	// We can expect to have the issue by loading program to IRAM in loop for an hour
+send_cmd:
+	nr_retries = NB_RETRY_FOR_VALID_RESULT;
 
 	if ((status = ci_commit_commands(rank, commands)) != DPU_OK) {
 		return status;
@@ -314,7 +322,16 @@ static u32 exec_cmd(struct dpu_rank_t *rank, u64 *commands,
 		in_progress = !determine_if_commands_are_finished(
 			rank, data, expected, result_masks, expected_color,
 			is_done);
+
 		timeout = (nr_retries--) == 0;
+
+		if (timeout && nr_retry_commit_cmd > 0) {
+			LOG_RANK(VERBOSE, rank,
+				 "Timeout, commands 0x%08lx is repeated",
+				 *commands);
+			nr_retry_commit_cmd--;
+			goto send_cmd;
+		}
 	} while (in_progress && !timeout);
 
 	if (in_progress) {

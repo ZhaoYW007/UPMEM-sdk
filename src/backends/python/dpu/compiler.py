@@ -21,6 +21,7 @@ Os = '-Os'
 Oz = '-Oz'
 """Optimization level corresponding to '-Oz'"""
 
+
 def getDpuArchVersion(target):
     if target is not None:
         if target == "dpu-upmem-dpurte":
@@ -31,13 +32,14 @@ def getDpuArchVersion(target):
                         dpu_chip_id = int(fd.readline())
                         if (dpu_chip_id > 8):
                             dpu_arch_version = "v1B"
-                except:
+                except BaseException:
                     pass
             if not dpu_arch_version:
                 dpu_arch_version = "v1A"
             return dpu_arch_version
     # target can be x86
     return None
+
 
 class Compiler:
     """

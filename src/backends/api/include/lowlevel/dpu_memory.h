@@ -6,9 +6,15 @@
 #ifndef DPU_MEMORY_H
 #define DPU_MEMORY_H
 
+#include <stdint.h>
+
 #include <dpu_error.h>
 #include <dpu_types.h>
-#include <dpu_transfer_matrix.h>
+
+struct dpu_fifo_rank_t;
+struct dpu_rank_t;
+struct dpu_t;
+struct dpu_transfer_matrix;
 
 /**
  * @file dpu_memory.h
@@ -128,6 +134,26 @@ dpu_copy_from_wram_for_dpu(struct dpu_t *dpu, dpuword_t *destination, wram_addr_
  */
 dpu_error_t
 dpu_copy_from_wram_for_matrix(struct dpu_rank_t *rank, struct dpu_transfer_matrix *transfer_matrix);
+
+/**
+ * @brief Copy a new element to the DPU FIFO from the host buffer in the fifo structure
+ * @param rank the DPU rank
+ * @param fifo the structure holding information about the DPU FIFO (address, size, local buffer etc.)
+ * @param transfer_matrix the transfer matrix
+ * @return Whether the operation was successful
+ */
+dpu_error_t
+dpu_copy_to_wram_fifo(struct dpu_rank_t *rank, struct dpu_fifo_rank_t *fifo, struct dpu_transfer_matrix *transfer_matrix);
+
+/**
+ * @brief Copy all elements from the DPU FIFO to the host buffer in the fifo structure
+ * @param rank the DPU rank
+ * @param fifo the structure holding information about the DPU FIFO (address, size, local buffer etc.)
+ * @param transfer_matrix the transfer matrix
+ * @return Whether the operation was successful
+ */
+dpu_error_t
+dpu_copy_from_wram_fifo(struct dpu_rank_t *rank, struct dpu_fifo_rank_t *fifo, struct dpu_transfer_matrix *transfer_matrix);
 
 /**
  * @brief Copy data to the MRAM of a DPU.

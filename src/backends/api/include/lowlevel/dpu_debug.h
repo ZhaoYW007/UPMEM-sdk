@@ -7,11 +7,12 @@
 #define DPU_DEBUG_H
 
 #include <stdint.h>
-#include <stdbool.h>
-#include <fcntl.h>
 
 #include <dpu_error.h>
 #include <dpu_types.h>
+
+struct dpu_rank_t;
+struct dpu_t;
 
 /**
  * @file dpu_debug.h

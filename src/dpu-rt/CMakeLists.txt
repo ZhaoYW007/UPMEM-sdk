@@ -218,6 +218,7 @@ set(SYSLIB_C_SOURCES
         ${SYSLIB_DIR}/truncdfsf2.c
         ${SYSLIB_DIR}/truncsfhf2.c
         ${SYSLIB_DIR}/ucmpdi2.c
+        ${SYSLIB_DIR}/udiv32.c
         ${SYSLIB_DIR}/udiv64.c
         ${SYSLIB_DIR}/udivdi3.c
         ${SYSLIB_DIR}/udivmodsi4.c
@@ -226,6 +227,7 @@ set(SYSLIB_C_SOURCES
         ${SYSLIB_DIR}/umodsi3.c
         ${SYSLIB_DIR}/vmutex.h
         ${SYSLIB_DIR}/waitqueue.c
+        ${SYSLIB_DIR}/wramfifo.c
    )
 
 set(UTILS_SOURCES
@@ -243,44 +245,49 @@ function(add_dpu_library)
     cmake_parse_arguments(DPU_LIB "PROFILING;LTO;LTO_THIN" "TARGET;CHIP" "SOURCES" ${ARGN})
     set(OTHER_FLAGS "")
 
-    if (DPU_LIB_PROFILING)
-        set(OTHER_FLAGS ${OTHER_FLAGS} ${PROFILING_FLAGS})
-    endif()
+    set(LOCAL_TARGET ${DPU_LIB_TARGET})
+    set(FILE_NAME ${DPU_LIB_TARGET})
 
     if (DPU_LIB_LTO)
+        string(APPEND LOCAL_TARGET "lto")
+        string(APPEND FILE_NAME "lto")
         set(OTHER_FLAGS ${OTHER_FLAGS} ${COMPILE_LTO_FLAGS})
     endif()
 
     if (DPU_LIB_LTO_THIN)
+        string(APPEND LOCAL_TARGET "ltothin")
+        string(APPEND FILE_NAME "ltothin")
         set(OTHER_FLAGS ${OTHER_FLAGS} ${COMPILE_LTO_THIN_FLAGS})
     endif()
 
+    if (DPU_LIB_PROFILING)
+        string(APPEND LOCAL_TARGET "_p")
+        string(APPEND FILE_NAME "_p")
+        set(OTHER_FLAGS ${OTHER_FLAGS} ${PROFILING_FLAGS})
+    endif()
+
+    string(APPEND LOCAL_TARGET "_${DPU_LIB_CHIP}")
+
     set(OTHER_FLAGS ${OTHER_FLAGS} -mcpu=${DPU_LIB_CHIP})
 
-    add_library(${DPU_LIB_TARGET} STATIC "${DPU_LIB_SOURCES}")
-    target_include_directories(${DPU_LIB_TARGET} PRIVATE ${INCLUDE_DIRECTORIES})
-
-    target_compile_options(${DPU_LIB_TARGET} PRIVATE ${NOSTDLIB_FLAGS} ${STRICT_FLAGS} ${COMPILER_TIMESTAMP_DEF} ${OTHER_FLAGS})
-
+    add_library(${LOCAL_TARGET} STATIC "${DPU_LIB_SOURCES}")
+    target_include_directories(${LOCAL_TARGET} PRIVATE ${INCLUDE_DIRECTORIES})
+    target_compile_options(${LOCAL_TARGET} PRIVATE ${NOSTDLIB_FLAGS} ${STRICT_FLAGS} ${COMPILER_TIMESTAMP_DEF} ${OTHER_FLAGS})
     install(
-        TARGETS ${DPU_LIB_TARGET}
+        TARGETS ${LOCAL_TARGET}
         ARCHIVE
         DESTINATION share/upmem/include/built-in/${DPU_LIB_CHIP}
         )
 endfunction()
 
-add_dpu_library(TARGET rt_v1A                             CHIP v1A SOURCES ${ALL_SOURCES})
-add_dpu_library(TARGET rt_p_v1A                 PROFILING CHIP v1A SOURCES ${ALL_SOURCES})
-add_dpu_library(TARGET rtlto_v1A       LTO                CHIP v1A SOURCES ${ALL_SOURCES})
-add_dpu_library(TARGET rtlto_p_v1A     LTO      PROFILING CHIP v1A SOURCES ${ALL_SOURCES})
-add_dpu_library(TARGET rtltothin_v1A   LTO_THIN           CHIP v1A SOURCES ${ALL_SOURCES})
-add_dpu_library(TARGET rtltothin_p_v1A LTO_THIN PROFILING CHIP v1A SOURCES ${ALL_SOURCES})
-add_dpu_library(TARGET rt_v1B                             CHIP v1B SOURCES ${ALL_SOURCES})
-add_dpu_library(TARGET rt_p_v1B                 PROFILING CHIP v1B SOURCES ${ALL_SOURCES})
-add_dpu_library(TARGET rtlto_v1B       LTO                CHIP v1B SOURCES ${ALL_SOURCES})
-add_dpu_library(TARGET rtlto_p_v1B     LTO      PROFILING CHIP v1B SOURCES ${ALL_SOURCES})
-add_dpu_library(TARGET rtltothin_v1B   LTO_THIN           CHIP v1B SOURCES ${ALL_SOURCES})
-add_dpu_library(TARGET rtltothin_p_v1B LTO_THIN PROFILING CHIP v1B SOURCES ${ALL_SOURCES})
+foreach(ITCHIP v1A;v1B)
+    add_dpu_library(TARGET rt                    CHIP ${ITCHIP} SOURCES ${ALL_SOURCES})
+    add_dpu_library(TARGET rt          PROFILING CHIP ${ITCHIP} SOURCES ${ALL_SOURCES})
+    add_dpu_library(TARGET rt LTO                CHIP ${ITCHIP} SOURCES ${ALL_SOURCES})
+    add_dpu_library(TARGET rt LTO      PROFILING CHIP ${ITCHIP} SOURCES ${ALL_SOURCES})
+    add_dpu_library(TARGET rt LTO_THIN           CHIP ${ITCHIP} SOURCES ${ALL_SOURCES})
+    add_dpu_library(TARGET rt LTO_THIN PROFILING CHIP ${ITCHIP} SOURCES ${ALL_SOURCES})
+endforeach()
 
 add_library(rtmcount_v1A STATIC ${SYSLIB_DIR}/mcount.c)
 target_compile_options(rtmcount_v1A PRIVATE ${NOSTDLIB_FLAGS} ${STRICT_FLAGS} ${COMPILER_TIMESTAMP_DEF} -mcpu=v1A)
@@ -315,27 +322,37 @@ install(
     )
 
 function(add_bootstrap)
-    cmake_parse_arguments(BOOTSTRAP "PROFILING" "TARGET" "SOURCES" ${ARGN})
+    cmake_parse_arguments(BOOTSTRAP "PROFILING" "TARGET;CHIP" "SOURCES" ${ARGN})
     set(OTHER_FLAGS "")
 
+    set(LOCAL_TARGET ${BOOTSTRAP_TARGET})
+    set(FILE_NAME ${BOOTSTRAP_TARGET})
+
     if (BOOTSTRAP_PROFILING)
+        string(APPEND LOCAL_TARGET "_p")
+        string(APPEND FILE_NAME "_p")
         set(OTHER_FLAGS ${OTHER_FLAGS} ${PROFILING_FLAGS})
     endif()
 
-    add_library(${BOOTSTRAP_TARGET} OBJECT ${BOOTSTRAP_SOURCES})
-    target_include_directories(${BOOTSTRAP_TARGET} PRIVATE ${INCLUDE_DIRECTORIES})
+    string(APPEND LOCAL_TARGET "_${BOOTSTRAP_CHIP}")
 
-    target_compile_options(${BOOTSTRAP_TARGET} PRIVATE ${STRICT_FLAGS} ${COMPILER_TIMESTAMP_DEF} ${OTHER_FLAGS})
+    set(OTHER_FLAGS ${OTHER_FLAGS} -mcpu=${BOOTSTRAP_CHIP})
+
+    add_library(${LOCAL_TARGET} OBJECT ${BOOTSTRAP_SOURCES})
+    target_include_directories(${LOCAL_TARGET} PRIVATE ${INCLUDE_DIRECTORIES})
+    target_compile_options(${LOCAL_TARGET} PRIVATE ${STRICT_FLAGS} ${COMPILER_TIMESTAMP_DEF} ${OTHER_FLAGS})
 
     install(
-        FILES $<TARGET_OBJECTS:${BOOTSTRAP_TARGET}>
-        DESTINATION share/upmem/include/misc/
-        RENAME ${BOOTSTRAP_TARGET}.o
+        FILES $<TARGET_OBJECTS:${LOCAL_TARGET}>
+        DESTINATION share/upmem/include/misc/${BOOTSTRAP_CHIP}
+        RENAME ${FILE_NAME}.o
         )
 endfunction()
 
-add_bootstrap(TARGET crt0             SOURCES ${UTILS_DIR}/crt0.c)
-add_bootstrap(TARGET crt0_p PROFILING SOURCES ${UTILS_DIR}/crt0.c)
+foreach(ITCHIP v1A;v1B)
+    add_bootstrap(TARGET crt0           CHIP ${ITCHIP} SOURCES ${UTILS_DIR}/crt0.c)
+    add_bootstrap(TARGET crt0 PROFILING CHIP ${ITCHIP} SOURCES ${UTILS_DIR}/crt0.c)
+endforeach()
 
 foreach(UTIL_FILE ${UTILS_SOURCES})
     get_filename_component(UTIL_TARGET ${UTIL_FILE} NAME_WE)

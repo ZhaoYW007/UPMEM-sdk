@@ -15,11 +15,16 @@
  * @brief MRAM Transfer Management.
  */
 
+/**
+ * @brief Pointer to the start of the heap in MRAM.
+ */
 #define DPU_MRAM_HEAP_POINTER ((__mram_ptr void *)(&__sys_used_mram_end))
+
+/// @cond INTERNAL
 extern __mram_ptr __dma_aligned uint8_t __sys_used_mram_end[0];
+/// @endcond
 
 /**
- * @fn mram_read
  * @brief Stores the specified number of bytes from MRAM to WRAM.
  * The number of bytes must be:
  *  - at least 8
@@ -41,7 +46,6 @@ mram_read(const __mram_ptr void *from, void *to, unsigned int nb_of_bytes)
 }
 
 /**
- * @fn mram_write
  * @brief Stores the specified number of bytes from WRAM to MRAM.
  * The number of bytes must be:
  *  - at least 8

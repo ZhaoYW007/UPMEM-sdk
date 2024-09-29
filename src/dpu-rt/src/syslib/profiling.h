@@ -15,10 +15,11 @@
 #include <limits.h>
 #include <profiling_internals.h>
 
+/// @cond INTERNAL
 #define PROFILING_RESET_VALUE (UINT32_MAX)
+/// @endcond
 
 /**
- * @def PROFILING_INIT
  * @hideinitializer
  * @brief Declare and initialize a profiling context associated to the given name.
  */
@@ -28,9 +29,15 @@
         .count = { [0 ...(NR_THREADS - 1)] = 0 },                                                                                \
     }
 
+#ifdef DOXYGEN_ONLY
+/**
+ * @brief Profiling toggle.
+ */
+#define DPU_PROFILING
+#endif
+
 #ifdef DPU_PROFILING
 /**
- * @fn profiling_start
  * @brief Start profiling a code section.
  *
  * This function saves the perfcounter current value in the profiling context.
@@ -41,7 +48,6 @@ void
 profiling_start(dpu_profiling_t *context);
 
 /**
- * @fn profiling_stop
  * @brief Stop profiling a code section.
  *
  * This function gets the perfcounter current value and computes the number of cyles spent in the code section.

@@ -19,22 +19,24 @@
  * Use one HW mutex and 2K virtual mutexes for unaligned MRAM accesses
  */
 #ifndef __MRAM_UNALIGNED_ACCESS_LOG_NB_VLOCK
+/**
+ * @brief Number of virtual locks used to protect unaligned MRAM accesses
+ */
 #define __MRAM_UNALIGNED_ACCESS_LOG_NB_VLOCK 11
 #endif
 
-/*
- * virtual mutexes structure to protect unaligned MRAM accesses
+/**
+ * @brief virtual mutexes structure to protect unaligned MRAM accesses
  */
 extern struct vmutex __mram_unaligned_access_virtual_locks;
 
-/*
+/**
+ * @brief Used to store MRAM 8 byte word before write.
  * One buffer per tasklet of 8 bytes.
- * Used to store MRAM 8 byte word before write.
  */
 extern __dma_aligned uint8_t __mram_unaligned_access_buffer[DPU_NR_THREADS << 3];
 
 /**
- * @fn mram_read_unaligned
  * @brief Stores the specified number of bytes from MRAM to WRAM.
  * The number of bytes must be at most 2048.
  * The MRAM address needs not be a multiple of 8.
@@ -53,7 +55,6 @@ void *
 mram_read_unaligned(const __mram_ptr void *from, void *buffer, unsigned int nb_of_bytes);
 
 /**
- * @fn mram_write_unaligned
  * @brief Stores the specified number of bytes from WRAM to MRAM.
  * The number of bytes must be at most 2048.
  * The MRAM address needs not be a multiple of 8.
@@ -63,15 +64,15 @@ mram_read_unaligned(const __mram_ptr void *from, void *buffer, unsigned int nb_o
  * If misaligned writes can be avoided, the mram_write function should be prefered.
  *
  * @param from source address in WRAM
- * @param to destination address in MRAM
+ * @param dest destination address in MRAM
  * @param nb_of_bytes number of bytes to transfer
  */
 void
 mram_write_unaligned(const void *from, __mram_ptr void *dest, unsigned nb_of_bytes);
 
 /**
- * @def mram_update_int_atomic
  * @brief update an integer in MRAM atomically (i.e., multi-tasklet safe)
+ * @hideinitializer
  * @param dest the integer address in MRAM
  * @param update_func the pointer to the update function
  * @param args a void* pointer, context passed to the update function
@@ -92,8 +93,8 @@ mram_write_unaligned(const void *from, __mram_ptr void *dest, unsigned nb_of_byt
     } while (0)
 
 /**
- * @def mram_write_int_atomic
  * @brief write an integer in MRAM atomically (i.e., multi-tasklet safe)
+ * @hideinitializer
  * @param dest the integer address in MRAM
  * @param val the new integer value
  */
@@ -111,8 +112,8 @@ mram_write_unaligned(const void *from, __mram_ptr void *dest, unsigned nb_of_byt
     } while (0)
 
 /**
- * @def mram_update_byte_atomic
  * @brief update a byte in MRAM atomically (i.e., multi-tasklet safe)
+ * @hideinitializer
  * @param dest the byte address in MRAM
  * @param update_func the pointer to the update function
  * @param args a void* pointer, context passed to the update function
@@ -133,8 +134,8 @@ mram_write_unaligned(const void *from, __mram_ptr void *dest, unsigned nb_of_byt
     } while (0)
 
 /**
- * @def mram_write_byte_atomic
  * @brief write a byte in MRAM atomically (i.e., multi-tasklet safe)
+ * @hideinitializer
  * @param dest the byte address in MRAM
  * @param val the new byte value
  */

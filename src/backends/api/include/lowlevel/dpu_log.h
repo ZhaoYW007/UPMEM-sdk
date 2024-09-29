@@ -7,10 +7,10 @@
 #define DPU_LOG_H
 
 #include <stdio.h>
-#include <stdbool.h>
 
 #include <dpu_error.h>
-#include <dpu_types.h>
+
+struct dpu_t;
 
 /**
  * @file dpu_log.h

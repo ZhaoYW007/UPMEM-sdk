@@ -1,87 +1,102 @@
-/* Copyright 2020 UPMEM. All rights reserved.
+/* Copyright 2024 UPMEM. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be
  * found in the LICENSE file.
  */
 
 #include <dpuruntime.h>
 
-void __attribute__((naked, noinline, no_instrument_function)) __udiv32(void)
+extern uint64_t
+__udiv32(uint32_t dividend, uint32_t divider);
+
+int64_t __attribute__((used)) __div32(int32_t dividend, int32_t divider)
 {
-    __asm__ volatile("  "__ADD_PROFILING_ENTRY__
-                     "  clz r3, r1, max, __udiv32_division_by_zero\n" // r3 = by how many the divider can be shifted on 32-bit
-                     "  clz r4, r0\n" // r4 = number of useless bits of the dividend
-                     "  sub r3, r4, r3, gtu, __udiv32_result_0\n" // r3 = the maximal shift to be done
-                     "  move r4, r1\n"
-                     "  move.u d0, r0\n"
-                     "  jump r3, __udiv32_base\n" // As we will jump backward relatively to __udiv32_base
-                     "  div_step d0, r4, d0, 31\n"
-                     "  div_step d0, r4, d0, 30\n"
-                     "  div_step d0, r4, d0, 29\n"
-                     "  div_step d0, r4, d0, 28\n"
-                     "  div_step d0, r4, d0, 27\n"
-                     "  div_step d0, r4, d0, 26\n"
-                     "  div_step d0, r4, d0, 25\n"
-                     "  div_step d0, r4, d0, 24\n"
-                     "  div_step d0, r4, d0, 23\n"
-                     "  div_step d0, r4, d0, 22\n"
-                     "  div_step d0, r4, d0, 21\n"
-                     "  div_step d0, r4, d0, 20\n"
-                     "  div_step d0, r4, d0, 19\n"
-                     "  div_step d0, r4, d0, 18\n"
-                     "  div_step d0, r4, d0, 17\n"
-                     "  div_step d0, r4, d0, 16\n"
-                     "  div_step d0, r4, d0, 15\n"
-                     "  div_step d0, r4, d0, 14\n"
-                     "  div_step d0, r4, d0, 13\n"
-                     "  div_step d0, r4, d0, 12\n"
-                     "  div_step d0, r4, d0, 11\n"
-                     "  div_step d0, r4, d0, 10\n"
-                     "  div_step d0, r4, d0, 9\n"
-                     "  div_step d0, r4, d0, 8\n"
-                     "  div_step d0, r4, d0, 7\n"
-                     "  div_step d0, r4, d0, 6\n"
-                     "  div_step d0, r4, d0, 5\n"
-                     "  div_step d0, r4, d0, 4\n"
-                     "  div_step d0, r4, d0, 3\n"
-                     "  div_step d0, r4, d0, 2\n"
-                     "  div_step d0, r4, d0, 1\n"
-                     "__udiv32_base:\n"
-                     "  div_step d0, r4, d0, 0\n"
-                     "__udiv32_exit:\n"
-                     "  jump r23\n"
-                     "__udiv32_result_0:\n"
-                     "  move.u d0, r0, true, __udiv32_exit\n"
-                     "__udiv32_division_by_zero:\n"
-                     "  fault "__STR(__FAULT_DIVISION_BY_ZERO__));
+    uint64_t res;
+    uint32_t q;
+    uint32_t rem;
+
+    __asm__ goto("clo zero, %[dividend], z, %l[__div32_pos_dividend]\n\t"
+                 "clo zero, %[divider], z, %l[__div32_neg_dividend_pos_divider]\n\t"
+                 :
+                 : [dividend] "r"(dividend), [divider] "r"(divider)
+                 :
+                 : __div32_pos_dividend, __div32_neg_dividend_pos_divider);
+
+    /* The quotient's sign depends on the sign of the dividend and divider... After few tries it sounds */
+    /* like the quickest way to select the operators is to branch according to the cases. */
+
+    /* __div32_neg_dividend_neg_divider: */
+    /* As a result, the quotient is positive and the remainder negative */
+    dividend = 0 - dividend;
+    divider = 0 - divider;
+    res = __udiv32(dividend, divider);
+    q = (uint32_t)(res >> 32);
+    rem = (uint32_t)res;
+    rem = 0 - rem;
+    goto recombine;
+
+__div32_neg_dividend_pos_divider:
+    /* As a result, the quotient is negative and the remainder negative */
+    dividend = 0 - dividend;
+    res = __udiv32(dividend, divider);
+    q = (uint32_t)(res >> 32);
+    q = 0 - q;
+    rem = (uint32_t)res;
+    rem = 0 - rem;
+    goto recombine;
+
+__div32_pos_dividend:
+    __asm__ goto("clo zero, %[divider], z, %l[__div32_pos_dividend_pos_divider]"
+                 :
+                 : [divider] "r"(divider)
+                 :
+                 : __div32_pos_dividend_pos_divider);
+    /* As a result, the quotient is negative and the remainder positive */
+    divider = 0 - divider;
+    res = __udiv32(dividend, divider);
+    q = (uint32_t)(res >> 32);
+    q = 0 - q;
+    rem = (uint32_t)res;
+    goto recombine;
+
+__div32_pos_dividend_pos_divider:
+    /* The dividend and divider are both positive */
+    res = __udiv32(dividend, divider);
+    goto last_exit;
+    /* q = (uint32_t) (res >> 32); */
+    /* rem = (uint32_t) res; */
+    /* goto recombine; */
+
+recombine:
+    res = q;
+    res <<= 32;
+    res |= rem;
+last_exit:
+    return res;
 }
 
-void __attribute__((naked, noinline, no_instrument_function)) __div32(void)
-{
-    __asm__ volatile("  "__ADD_PROFILING_ENTRY__
-                     "sd r22, 0, d22\n"
-                     "add r22, r22, 8\n"
-                     // The quotient's sign depends on the sign of the dividend and divider... After few tries it sounds
-                     // like the quickest way to select the operators is to branch according to the cases.
-                     "  clo r3, r0, z, __div32_pos_dividend\n"
-                     "  clo r3, r1, z, __div32_neg_dividend_pos_divider\n"
-                     "__div32_neg_dividend_neg_divider:\n" // As a result, the quotient is positive and the remainder negative
-                     "  neg r0, r0\n"
-                     "  neg r1, r1\n"
-                     "  call r23, __udiv32\n"
-                     "  neg r1, r1, true, __div32_exit\n"
-                     "__div32_neg_dividend_pos_divider:\n" // As a result, the quotient is negative and the remainder negative
-                     "  neg r0, r0\n"
-                     "  call r23, __udiv32\n"
-                     "  neg r1, r1\n"
-                     "  neg r0, r0, true, __div32_exit\n"
-                     "__div32_pos_dividend:\n"
-                     "  clo r3, r1, z, __div32_pos_dividend_pos_divider\n"
-                     "  neg r1, r1\n" // As a result, the quotient is negative and the remainder positive
-                     "  call r23, __udiv32\n"
-                     "  neg r0, r0, true, __div32_exit\n"
-                     "__div32_pos_dividend_pos_divider:\n" // The dividend and divider are both positive
-                     "  call r23, __udiv32\n"
-                     "__div32_exit:\n"
-                     "  ld d22, r22, -8\n"
-                     "  jump r23\n");
-}
+/* int64_t __attribute__((used)) __div32(int32_t a, int32_t b) */
+/* { */
+/*     uint64_t res; */
+/*     uint32_t q; */
+/*     uint32_t rem; */
+
+/*     const int bits_in_word_m1 = (int)(sizeof(int) * CHAR_BIT) - 1; */
+/*     int s_a = a >> bits_in_word_m1; /\* s_a = a < 0 ? -1 : 0 *\/ */
+/*     int s_b = b >> bits_in_word_m1; /\* s_b = b < 0 ? -1 : 0 *\/ */
+/*     a = (a ^ s_a) - s_a; /\* negate if s_a == -1 *\/ */
+/*     b = (b ^ s_b) - s_b; /\* negate if s_b == -1 *\/ */
+/*     int s_q = s_a ^ s_b; /\* sign of quotient *\/ */
+
+/*     res = __udiv32(a, b); */
+/*     q = (uint32_t) (res >> 32); */
+/*     rem = (uint32_t) res; */
+
+/*     q = (q ^ s_q) + (-s_q); */
+/*     rem = (rem ^ s_a) + (-s_a); */
+
+/*     res = q; */
+/*     res <<= 32; */
+/*     res |= rem; */
+
+/*     return res; */
+/* } */

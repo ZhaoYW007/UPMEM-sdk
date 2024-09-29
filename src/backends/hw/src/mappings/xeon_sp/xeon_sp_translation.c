@@ -525,18 +525,24 @@ write_next_eight_bytes(struct sg_xfer_buffer_iterator *sg_it, uint64_t *in_buffe
 }
 
 static void
-threads_write_to_rank(struct xeon_sp_private *xeon_sp_priv, uint8_t dpu_id_start, uint8_t dpu_id_stop)
+threads_write_to_rank(struct xeon_sp_private *xeon_sp_priv,
+    uint8_t dpu_id_start,
+    uint8_t dpu_id_stop,
+    uint32_t data_id_start,
+    uint32_t data_id_stop)
 {
     struct dpu_transfer_matrix *xfer_matrix = xeon_sp_priv->xfer_matrix;
     uint64_t cache_line[NB_REAL_CIS];
     uint8_t idx, ci_id, dpu_id, nb_cis;
-    uint32_t size_transfer = xfer_matrix->size;
+    uint32_t size_transfer = data_id_stop ? data_id_stop - data_id_start : xfer_matrix->size;
     uint32_t offset = xfer_matrix->offset;
 
     nb_cis = xeon_sp_priv->tr->desc->topology.nr_of_control_interfaces;
 
     if (!size_transfer)
         return;
+
+    data_id_start /= sizeof(uint64_t);
 
     /* Works only for transfers:
      * - of same size and same offset on the same line
@@ -567,7 +573,7 @@ threads_write_to_rank(struct xeon_sp_private *xeon_sp_priv, uint8_t dpu_id_start
                 if (sg_buff)
                     init_sg_xfer_buffer_iterator(&sg_it[ci_id], sg_buff);
             }
-            for (i = 0; i < size_transfer / sizeof(uint64_t); ++i) {
+            for (i = data_id_start; i < data_id_start + size_transfer / sizeof(uint64_t); ++i) {
                 uint32_t mram_64_bit_word_offset = apply_address_translation_on_mram_offset(i * 8 + offset) / 8;
                 uint64_t next_data = BANK_OFFSET_NEXT_DATA(mram_64_bit_word_offset * sizeof(uint64_t));
                 uint64_t offset = (next_data % BANK_CHUNK_SIZE) + (next_data / BANK_CHUNK_SIZE) * BANK_NEXT_CHUNK_OFFSET;
@@ -580,7 +586,7 @@ threads_write_to_rank(struct xeon_sp_private *xeon_sp_priv, uint8_t dpu_id_start
                 byte_interleave_avx512(cache_line, (uint64_t *)((uint8_t *)ptr_dest + offset), true);
             }
         } else {
-            for (i = 0; i < size_transfer / sizeof(uint64_t); ++i) {
+            for (i = data_id_start; i < data_id_start + size_transfer / sizeof(uint64_t); ++i) {
                 uint32_t mram_64_bit_word_offset = apply_address_translation_on_mram_offset(i * 8 + offset) / 8;
                 uint64_t next_data = BANK_OFFSET_NEXT_DATA(mram_64_bit_word_offset * sizeof(uint64_t));
                 uint64_t offset = (next_data % BANK_CHUNK_SIZE) + (next_data / BANK_CHUNK_SIZE) * BANK_NEXT_CHUNK_OFFSET;
@@ -605,18 +611,24 @@ threads_write_to_rank(struct xeon_sp_private *xeon_sp_priv, uint8_t dpu_id_start
 }
 
 static void
-threads_read_from_rank(struct xeon_sp_private *xeon_sp_priv, uint8_t dpu_id_start, uint8_t dpu_id_stop)
+threads_read_from_rank(struct xeon_sp_private *xeon_sp_priv,
+    uint8_t dpu_id_start,
+    uint8_t dpu_id_stop,
+    uint32_t data_id_start,
+    uint32_t data_id_stop)
 {
     struct dpu_transfer_matrix *xfer_matrix = xeon_sp_priv->xfer_matrix;
     uint64_t cache_line[NB_REAL_CIS], cache_line_interleave[NB_REAL_CIS];
     uint8_t idx, ci_id, dpu_id, nb_cis;
-    uint32_t size_transfer = xfer_matrix->size;
+    uint32_t size_transfer = data_id_stop ? data_id_stop - data_id_start : xfer_matrix->size;
     uint32_t offset = xfer_matrix->offset;
 
     nb_cis = xeon_sp_priv->tr->desc->topology.nr_of_control_interfaces;
 
     if (!size_transfer)
         return;
+
+    data_id_start /= sizeof(uint64_t);
 
     /* Works only for transfers of same size and same offset on the
      * same line
@@ -638,7 +650,7 @@ threads_read_from_rank(struct xeon_sp_private *xeon_sp_priv, uint8_t dpu_id_star
             continue;
         __builtin_ia32_mfence();
 
-        for (i = 0; i < size_transfer / sizeof(uint64_t); ++i) {
+        for (i = data_id_start; i < data_id_start + size_transfer / sizeof(uint64_t); ++i) {
             uint32_t mram_64_bit_word_offset = apply_address_translation_on_mram_offset(i * 8 + offset) / 8;
             uint64_t next_data = BANK_OFFSET_NEXT_DATA(mram_64_bit_word_offset * sizeof(uint64_t));
             uint64_t offset = (next_data % BANK_CHUNK_SIZE) + (next_data / BANK_CHUNK_SIZE) * BANK_NEXT_CHUNK_OFFSET;
@@ -659,7 +671,7 @@ threads_read_from_rank(struct xeon_sp_private *xeon_sp_priv, uint8_t dpu_id_star
                     init_sg_xfer_buffer_iterator(&sg_it[ci_id], sg_buff);
             }
 
-            for (i = 0; i < size_transfer / sizeof(uint64_t); ++i) {
+            for (i = data_id_start; i < data_id_start + size_transfer / sizeof(uint64_t); ++i) {
                 uint32_t mram_64_bit_word_offset = apply_address_translation_on_mram_offset(i * 8 + offset) / 8;
                 uint64_t next_data = BANK_OFFSET_NEXT_DATA(mram_64_bit_word_offset * sizeof(uint64_t));
                 uint64_t offset = (next_data % BANK_CHUNK_SIZE) + (next_data / BANK_CHUNK_SIZE) * BANK_NEXT_CHUNK_OFFSET;
@@ -681,7 +693,7 @@ threads_read_from_rank(struct xeon_sp_private *xeon_sp_priv, uint8_t dpu_id_star
                 }
             }
         } else {
-            for (i = 0; i < size_transfer / sizeof(uint64_t); ++i) {
+            for (i = data_id_start; i < data_id_start + size_transfer / sizeof(uint64_t); ++i) {
                 uint32_t mram_64_bit_word_offset = apply_address_translation_on_mram_offset(i * 8 + offset) / 8;
                 uint64_t next_data = BANK_OFFSET_NEXT_DATA(mram_64_bit_word_offset * sizeof(uint64_t));
                 uint64_t offset = (next_data % BANK_CHUNK_SIZE) + (next_data / BANK_CHUNK_SIZE) * BANK_NEXT_CHUNK_OFFSET;
@@ -707,7 +719,7 @@ threads_read_from_rank(struct xeon_sp_private *xeon_sp_priv, uint8_t dpu_id_star
 
         __builtin_ia32_mfence();
 
-        for (i = 0; i < size_transfer / sizeof(uint64_t); ++i) {
+        for (i = data_id_start; i < data_id_start + size_transfer / sizeof(uint64_t); ++i) {
             uint32_t mram_64_bit_word_offset = apply_address_translation_on_mram_offset(i * 8 + offset) / 8;
             uint64_t next_data = BANK_OFFSET_NEXT_DATA(mram_64_bit_word_offset * sizeof(uint64_t));
             uint64_t offset = (next_data % BANK_CHUNK_SIZE) + (next_data / BANK_CHUNK_SIZE) * BANK_NEXT_CHUNK_OFFSET;
@@ -719,6 +731,66 @@ threads_read_from_rank(struct xeon_sp_private *xeon_sp_priv, uint8_t dpu_id_star
     }
 }
 
+static bool
+is_dpu_line_in_xfer(struct xeon_sp_private *xeon_sp_priv, uint8_t line_id)
+{
+
+    // TODO check if this is correct
+    struct dpu_transfer_matrix *m = xeon_sp_priv->xfer_matrix;
+    for (uint8_t i = 0; i < xeon_sp_priv->nb_dpus_per_ci; ++i) {
+
+        if (m->ptr[line_id * xeon_sp_priv->nb_dpus_per_ci + i])
+            return true;
+    }
+    return false;
+}
+
+static uint8_t
+get_nb_lines_in_xfer(struct xeon_sp_private *xeon_sp_priv)
+{
+
+    uint8_t res = 0;
+    uint8_t nb_cis = xeon_sp_priv->tr->desc->topology.nr_of_control_interfaces;
+    for (int i = 0; i < nb_cis; ++i) {
+        if (is_dpu_line_in_xfer(xeon_sp_priv, i))
+            ++res;
+    }
+    return res;
+}
+
+static void
+thread_mram_get_dpu_and_data_ids(uint8_t thread_id,
+    uint8_t nb_threads_per_line,
+    struct xeon_sp_private *xeon_sp_priv,
+    uint8_t *dpu_id_start,
+    uint8_t *dpu_id_stop,
+    uint32_t *data_id_start)
+{
+
+    uint8_t cnt = 0;
+    uint8_t nb_cis = xeon_sp_priv->tr->desc->topology.nr_of_control_interfaces;
+    uint8_t last_line = 0;
+    for (uint8_t i = 0; i < nb_cis; ++i) {
+        if (is_dpu_line_in_xfer(xeon_sp_priv, i))
+            ++cnt;
+        if (!cnt)
+            continue;
+        for (int j = 0; j < nb_threads_per_line; ++j) {
+            if ((cnt - 1) * nb_threads_per_line + j == thread_id) {
+                *data_id_start = j;
+                *dpu_id_start = last_line;
+                *dpu_id_stop = i + 1;
+                return;
+            }
+        }
+        if (is_dpu_line_in_xfer(xeon_sp_priv, i))
+            last_line = i + 1;
+    }
+    *data_id_start = 0;
+    *dpu_id_start = nb_cis;
+    *dpu_id_stop = nb_cis;
+}
+
 static void
 thread_do_mram_xfer(struct xeon_sp_private *xeon_sp_priv, uint8_t thread_id)
 {
@@ -726,19 +798,47 @@ thread_do_mram_xfer(struct xeon_sp_private *xeon_sp_priv, uint8_t thread_id)
     if (!(nb_threads_for_xfer > thread_id)) {
         return;
     }
-    uint8_t nb_dpus_per_thread = xeon_sp_priv->nb_dpus_per_ci / nb_threads_for_xfer;
-    uint8_t dpu_id_start = thread_id * nb_dpus_per_thread;
+    // get xfer_matrix, check the number of lines that are targetted, use
+    // one thread per targetted line if possible, or 1 thread per 2 lines.
+    uint8_t dpu_id_start;
     uint8_t dpu_id_stop;
-    if (thread_id == nb_threads_for_xfer - 1) {
-        dpu_id_stop = xeon_sp_priv->nb_dpus_per_ci;
+    uint32_t data_id_start = 0;
+    uint32_t data_id_stop = 0;
+    uint8_t nb_lines_in_xfer = get_nb_lines_in_xfer(xeon_sp_priv);
+    if (nb_lines_in_xfer <= nb_threads_for_xfer) {
+        // can use one thread for each line
+
+        uint8_t nb_threads_per_line = 1;
+        if (nb_lines_in_xfer <= nb_threads_for_xfer / 2 && xeon_sp_priv->xfer_matrix->size % 16 == 0) {
+            // can use 2 threads per line
+            // parallelize on the data
+            nb_threads_per_line = 2;
+            data_id_start = 0;
+            data_id_stop = 0;
+        }
+        uint32_t size = xeon_sp_priv->xfer_matrix->size / nb_threads_per_line;
+        data_id_start = 0;
+        thread_mram_get_dpu_and_data_ids(
+            thread_id, nb_threads_per_line, xeon_sp_priv, &dpu_id_start, &dpu_id_stop, &data_id_start);
+        data_id_start *= size;
+        data_id_stop = data_id_start + size;
+        if (xeon_sp_priv->xfer_matrix->size - data_id_stop < size)
+            data_id_stop = xeon_sp_priv->xfer_matrix->size;
     } else {
-        dpu_id_stop = (thread_id + 1) * nb_dpus_per_thread;
+        uint8_t nb_dpus_per_thread = xeon_sp_priv->nb_dpus_per_ci / nb_threads_for_xfer;
+        dpu_id_start = thread_id * nb_dpus_per_thread;
+        if (thread_id == nb_threads_for_xfer - 1) {
+            dpu_id_stop = xeon_sp_priv->nb_dpus_per_ci;
+        } else {
+            dpu_id_stop = (thread_id + 1) * nb_dpus_per_thread;
+        }
     }
 
     if (xeon_sp_priv->direction == thread_mram_xfer_read)
-        threads_read_from_rank(xeon_sp_priv, dpu_id_start, dpu_id_stop);
-    else
-        threads_write_to_rank(xeon_sp_priv, dpu_id_start, dpu_id_stop);
+        threads_read_from_rank(xeon_sp_priv, dpu_id_start, dpu_id_stop, data_id_start, data_id_stop);
+    else {
+        threads_write_to_rank(xeon_sp_priv, dpu_id_start, dpu_id_stop, data_id_start, data_id_stop);
+    }
 }
 
 static int

@@ -11,6 +11,7 @@
  * @brief Provides common useful compiler attributes.
  */
 
+/// @cond INTERNAL
 #define DEPRECATED __attribute__((deprecated))
 
 #if __STDC_VERSION__ >= 201112L
@@ -36,16 +37,18 @@
 #define __keep __used __section(".data.__sys_keep")
 
 #define __host __aligned(8) __used __section(".dpu_host")
+/// @endcond
 
-// Use this macro at variable definition to place this variable into the section
-// .data.immediate_memory and then makes it possible to use this variable
-// directly as an immediate into load store instructions (and then avoids the need
-// to move the address into a register before): immediate values are 12 signed bits
-// large.
+/**
+ * Use this macro at variable definition to place this variable into the section
+ * .data.immediate_memory and then makes it possible to use this variable
+ * directly as an immediate into load store instructions (and then avoids the need
+ * to move the address into a register before): immediate values are 12 signed bits
+ * large.
+ */
 #define __lower_data(name) __attribute__((used, section(".data.immediate_memory." name)))
 
 /**
- * @def __mram_ptr
  * @brief An attribute declaring that a pointer is an address in MRAM.
  *
  * A typical usage is: ``unsigned int __mram_ptr * array32 = (unsigned int __mram_ptr *) 0xf000;``
@@ -55,12 +58,24 @@
  */
 #define __mram_ptr __attribute__((address_space(255)))
 
+/**
+ * @brief An attribute for declaring a variable in MRAM.
+ */
 #define __mram __mram_ptr __section(".mram") __dma_aligned __used
 
+/**
+ * @brief An attribute for declaring a variable in MRAM that should not be initialized.
+ */
 #define __mram_noinit __mram_ptr __section(".mram.noinit") __dma_aligned __used
 
+/**
+ * @brief An attribute for declaring a variable in MRAM that should be kept.
+ */
 #define __mram_keep __mram_ptr __section(".mram.keep") __dma_aligned __used
 
+/**
+ * @brief An attribute for declaring a variable in MRAM that should not be initialized and should be kept.
+ */
 #define __mram_noinit_keep __mram_ptr __section(".mram.noinit.keep") __dma_aligned __used
 
 #endif /* DPUSYSCORE_ATTRIBUTES_H */

@@ -176,6 +176,11 @@ dpu_load_generic(struct dpu_set_t dpu_set,
     dpu_init_program_ref(runtime);
 
     dpu_description_t description = get_set_description(&dpu_set);
+    if (description == NULL) {
+        status = DPU_ERR_INTERNAL;
+        free(runtime);
+        goto end;
+    }
 
     if ((status = load_elf_program(&elf_info, path, buffer, buffer_size, runtime, description->hw.memories.mram_size))
         != DPU_OK) {

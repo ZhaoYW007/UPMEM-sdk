@@ -1,4 +1,5 @@
 include/ufi/ufi.h
+include/ufi/ufi_bank_interface_pmc.h
 include/ufi/ufi_bit_config.h
 include/ufi/ufi_ci.h
 include/ufi/ufi_ci_commands.h
@@ -9,6 +10,7 @@ include/ufi/ufi_dma_wavegen_config.h
 include/ufi/ufi_memory.h
 include/ufi/ufi_runner.h
 src/ufi.c
+src/ufi_bank_interface_pmc.c
 src/ufi_bit_config.c
 src/ufi_ci.c
 src/ufi_config.c

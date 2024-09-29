@@ -19,6 +19,9 @@
 
 #ifndef NR_THREADS
 #ifdef DPU_NR_THREADS
+/**
+ * @brief The number of profiled threads.
+ */
 #define NR_THREADS DPU_NR_THREADS
 #else
 #error "DPU_NR_THREADS and NR_THREADS are undefined"
@@ -26,12 +29,12 @@
 #endif /* !NR_THREADS */
 
 /**
- * @typedef dpu_profiling_t
+ * @struct dpu_profiling_t
  * @brief A profiling context.
  */
 typedef struct {
-    uint32_t start[NR_THREADS];
-    uint32_t count[NR_THREADS];
+    uint32_t start[NR_THREADS]; /**< The start perfcounter value. */
+    uint32_t count[NR_THREADS]; /**< The number of cycles spent in the code section. */
 } dpu_profiling_t;
 
 #endif /* DPUSYSCORE_PROFILING_INTERNALS_H */

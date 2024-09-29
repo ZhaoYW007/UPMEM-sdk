@@ -844,6 +844,10 @@ dpu_elf_create_core_dump(const char *exe_path,
             goto core_dump_close_exe_elf;
         }
     }
+    if (shdr_symtab == NULL) {
+        elf_status = DPU_ERR_ELF_INVALID_FILE;
+        goto core_dump_close_exe_elf;
+    }
     shdr_symtab->sh_link = strtab_idx;
 
     // ADD SHSTRTAB SECTION IN OUTPUT ELF

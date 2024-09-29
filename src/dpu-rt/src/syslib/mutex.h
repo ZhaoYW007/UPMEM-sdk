@@ -35,14 +35,12 @@
 typedef uint8_t *mutex_id_t;
 
 /**
- * @def MUTEX_GET
  * @hideinitializer
  * @brief Return the symbol to use when using the mutex associated to the given name.
  */
 #define MUTEX_GET(_name) _name
 
 /**
- * @def MUTEX_INIT
  * @hideinitializer
  * @brief Declare and initialize a mutex associated to the given name.
  */
@@ -51,7 +49,6 @@ typedef uint8_t *mutex_id_t;
     const mutex_id_t MUTEX_GET(_name) = &ATOMIC_BIT_GET(__CONCAT(mutex_, _name))
 
 /**
- * @fn mutex_lock
  * @brief Takes the lock on the given mutex.
  * @param mutex the mutex we want to lock
  */
@@ -62,7 +59,6 @@ mutex_lock(mutex_id_t mutex)
 }
 
 /**
- * @fn mutex_trylock
  * @brief Tries to take the lock on the given mutex. If the lock is already taken, returns immediately.
  * @param mutex the mutex we want to lock
  * @return Whether the mutex has been successfully locked.
@@ -76,7 +72,6 @@ mutex_trylock(mutex_id_t mutex)
 }
 
 /**
- * @fn mutex_unlock
  * @brief Releases the lock on the given mutex.
  * @param mutex the mutex we want to unlock
  */

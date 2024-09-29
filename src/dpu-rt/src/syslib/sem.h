@@ -24,18 +24,21 @@
 #include <stdint.h>
 
 /**
+ * @struct sem_t
+ * @brief A semaphore object, as declared by SEMAPHORE_INIT.
+ */
+/**
  * @typedef sem_t
  * @brief A semaphore object, as declared by SEMAPHORE_INIT.
  */
 typedef struct sem_t {
-    uint8_t wait_queue;
-    uint8_t count;
-    uint8_t initial_count;
-    uint8_t lock;
+    uint8_t wait_queue; /**< The wait queue. */
+    uint8_t count; /**< The number of units available in the semaphore. */
+    uint8_t initial_count; /**< The initial number of units available in the semaphore. */
+    uint8_t lock; /**< The lock. */
 } sem_t;
 
 /**
- * @def SEMAPHORE_INIT
  * @hideinitializer
  * @brief Declare and initialize a semaphore associated to the given name.
  */
@@ -57,7 +60,6 @@ typedef struct sem_t {
 /* clang-format on */
 
 /**
- * @fn sem_take
  * @brief Takes one unit in the given semaphore (cf Take definition).
  * @param sem the semaphore we want to take
  */
@@ -65,7 +67,6 @@ void
 sem_take(sem_t *sem);
 
 /**
- * @fn sem_give
  * @brief Gives on unit in the given semaphore (cf Give definition).
  * @param sem the semaphore we want to give
  */

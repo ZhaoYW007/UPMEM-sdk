@@ -190,9 +190,7 @@ Java_com_upmem_dpu_NativeDpuSet_descriptionFor(JNIEnv *env, __attribute__((unuse
     const char *c_profile = (*env)->GetStringUTFChars(env, profile, 0);
     dpu_description_t description = NULL;
 
-    /*dpu_get_profile_description is called with rank_id = 0 because we want to retrieve the description for the first rank in
-     * this context */
-    THROW_ON_ERROR_L(dpu_get_profile_description(c_profile, &description, 0), error);
+    THROW_ON_ERROR_L(dpu_get_profile_description(c_profile, &description), error);
 
     (*env)->ReleaseStringUTFChars(env, profile, c_profile);
 

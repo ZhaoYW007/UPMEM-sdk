@@ -27,13 +27,13 @@
  * @brief structure holding a pool of hardware mutexes
  */
 struct mutex_pool {
-    uint8_t *hw_mutexes;
-    uint8_t hw_mutexes_mask;
+    uint8_t *hw_mutexes; /**< hardware mutexes */
+    uint8_t hw_mutexes_mask; /**< mask for hardware mutexes */
 };
 
 /**
- * @def MUTEX_POOL_INIT
  * @brief initialize a pool using a given number of hardware mutexes
+ * @hideinitializer
  * The number of mutexes should be a power of 2
  */
 #define MUTEX_POOL_INIT(NAME, NB_MUTEXES)                                                                                        \
@@ -43,7 +43,6 @@ struct mutex_pool {
     struct mutex_pool NAME = { .hw_mutexes = hw_mutexes_##NAME, .hw_mutexes_mask = NB_MUTEXES - 1 };
 
 /**
- * @fn mutex_pool_lock
  * @brief Takes the lock for the given element id.
  * @param mp the mutex pool structure
  * @param id the id of the element to lock
@@ -55,7 +54,6 @@ mutex_pool_lock(struct mutex_pool *mp, uint16_t id)
 }
 
 /**
- * @fn mutex_pool_unlock
  * @brief Releases the lock for the given element id.
  * @param mp the mutex pool structure
  * @param id the id of the element to unlock

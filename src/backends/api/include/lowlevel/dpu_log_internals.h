@@ -6,8 +6,11 @@
 #ifndef DPU_LOG_INTERNALS_H
 #define DPU_LOG_INTERNALS_H
 
+#include <stddef.h>
+
 #include <dpu_error.h>
-#include <dpu_types.h>
+
+struct dpu_t;
 
 /**
  * @file dpu_log_internals.h

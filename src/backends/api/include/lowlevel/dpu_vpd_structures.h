@@ -9,6 +9,8 @@
 #ifndef DPU_VPD_STRUCTURES_H
 #define DPU_VPD_STRUCTURES_H
 
+#include <dpu_types.h>
+
 /**
  * @file dpu_vpd_structures.h
  * @brief Definition of VPD data structures

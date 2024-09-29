@@ -899,14 +899,14 @@ uint32_t = __uint32_t  # /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h: 26
 
 uint64_t = __uint64_t  # /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h: 27
 
-enum_dpu_vpd_repair_type = c_int  # api/include/lowlevel/dpu_vpd_structures.h: 51
+enum_dpu_vpd_repair_type = c_int  # api/include/lowlevel/dpu_vpd_structures.h: 53
 
-DPU_VPD_REPAIR_IRAM = 0  # api/include/lowlevel/dpu_vpd_structures.h: 51
+DPU_VPD_REPAIR_IRAM = 0  # api/include/lowlevel/dpu_vpd_structures.h: 53
 
-# api/include/lowlevel/dpu_vpd_structures.h: 51
+# api/include/lowlevel/dpu_vpd_structures.h: 53
 DPU_VPD_REPAIR_WRAM = (DPU_VPD_REPAIR_IRAM + 1)
 
-# api/include/lowlevel/dpu_vpd_structures.h: 61
+# api/include/lowlevel/dpu_vpd_structures.h: 63
 
 
 class struct_dpu_vpd_rank_data(Structure):
@@ -924,7 +924,7 @@ struct_dpu_vpd_rank_data._fields_ = [
     ('iram_repair', uint64_t),
 ]
 
-# api/include/lowlevel/dpu_vpd_structures.h: 73
+# api/include/lowlevel/dpu_vpd_structures.h: 75
 
 
 class struct_dpu_vpd_repair_entry(Structure):
@@ -952,7 +952,7 @@ struct_dpu_vpd_repair_entry._fields_ = [
     ('bits', uint64_t),
 ]
 
-# api/include/lowlevel/dpu_vpd_structures.h: 95
+# api/include/lowlevel/dpu_vpd_structures.h: 97
 
 
 class struct_dpu_vpd_header(Structure):
@@ -980,21 +980,21 @@ struct_dpu_vpd_header._fields_ = [
     ('ranks', struct_dpu_vpd_rank_data * int(4)),
 ]
 
-enum_vpd_data_type = c_int  # api/include/lowlevel/dpu_vpd_structures.h: 124
+enum_vpd_data_type = c_int  # api/include/lowlevel/dpu_vpd_structures.h: 126
 
-VPD_TYPE_STRING = 0  # api/include/lowlevel/dpu_vpd_structures.h: 124
+VPD_TYPE_STRING = 0  # api/include/lowlevel/dpu_vpd_structures.h: 126
 
-VPD_TYPE_BYTE = 1  # api/include/lowlevel/dpu_vpd_structures.h: 124
+VPD_TYPE_BYTE = 1  # api/include/lowlevel/dpu_vpd_structures.h: 126
 
-VPD_TYPE_SHORT = 2  # api/include/lowlevel/dpu_vpd_structures.h: 124
+VPD_TYPE_SHORT = 2  # api/include/lowlevel/dpu_vpd_structures.h: 126
 
-VPD_TYPE_INT = 4  # api/include/lowlevel/dpu_vpd_structures.h: 124
+VPD_TYPE_INT = 4  # api/include/lowlevel/dpu_vpd_structures.h: 126
 
-VPD_TYPE_LONG = 8  # api/include/lowlevel/dpu_vpd_structures.h: 124
+VPD_TYPE_LONG = 8  # api/include/lowlevel/dpu_vpd_structures.h: 126
 
-VPD_TYPE_BYTEARRAY = 9  # api/include/lowlevel/dpu_vpd_structures.h: 124
+VPD_TYPE_BYTEARRAY = 9  # api/include/lowlevel/dpu_vpd_structures.h: 126
 
-# api/include/lowlevel/dpu_vpd_structures.h: 136
+# api/include/lowlevel/dpu_vpd_structures.h: 138
 
 
 class struct_dpu_vpd(Structure):
@@ -1013,7 +1013,7 @@ struct_dpu_vpd._fields_ = [
          ((2048 - sizeof(struct_dpu_vpd_header)) / sizeof(struct_dpu_vpd_repair_entry)))),
 ]
 
-# api/include/lowlevel/dpu_vpd_structures.h: 146
+# api/include/lowlevel/dpu_vpd_structures.h: 148
 
 
 class struct_dpu_vpd_string_pair(Structure):
@@ -1035,7 +1035,7 @@ struct_dpu_vpd_string_pair._fields_ = [
     ('next', POINTER(struct_dpu_vpd_string_pair)),
 ]
 
-# api/include/lowlevel/dpu_vpd_structures.h: 162
+# api/include/lowlevel/dpu_vpd_structures.h: 164
 
 
 class struct_dpu_vpd_database(Structure):
@@ -1049,59 +1049,59 @@ struct_dpu_vpd_database._fields_ = [
     ('first', POINTER(struct_dpu_vpd_string_pair)),
 ]
 
-enum_dpu_vpd_error = c_int  # api/include/lowlevel/dpu_vpd_structures.h: 170
+enum_dpu_vpd_error = c_int  # api/include/lowlevel/dpu_vpd_structures.h: 172
 
-DPU_VPD_OK = 0  # api/include/lowlevel/dpu_vpd_structures.h: 170
+DPU_VPD_OK = 0  # api/include/lowlevel/dpu_vpd_structures.h: 172
 
-# api/include/lowlevel/dpu_vpd_structures.h: 170
+# api/include/lowlevel/dpu_vpd_structures.h: 172
 DPU_VPD_ERR_HEADER_FORMAT = (DPU_VPD_OK + 1)
 
-# api/include/lowlevel/dpu_vpd_structures.h: 170
+# api/include/lowlevel/dpu_vpd_structures.h: 172
 DPU_VPD_ERR_HEADER_VERSION = (DPU_VPD_ERR_HEADER_FORMAT + 1)
 
-# api/include/lowlevel/dpu_vpd_structures.h: 170
+# api/include/lowlevel/dpu_vpd_structures.h: 172
 DPU_VPD_ERR_REPAIR_ENTRIES = (DPU_VPD_ERR_HEADER_VERSION + 1)
 
-# api/include/lowlevel/dpu_vpd_structures.h: 170
+# api/include/lowlevel/dpu_vpd_structures.h: 172
 DPU_VPD_ERR_NB_MAX_REPAIR = (DPU_VPD_ERR_REPAIR_ENTRIES + 1)
 
-# api/include/lowlevel/dpu_vpd_structures.h: 170
+# api/include/lowlevel/dpu_vpd_structures.h: 172
 DPU_VPD_ERR_FLASH = (DPU_VPD_ERR_NB_MAX_REPAIR + 1)
 
-# api/include/lowlevel/dpu_vpd_structures.h: 170
+# api/include/lowlevel/dpu_vpd_structures.h: 172
 DPU_VPD_ERR_DPU_ALREADY_ENABLED = (DPU_VPD_ERR_FLASH + 1)
 
 DPU_VPD_ERR_DPU_ALREADY_DISABLED = (
     DPU_VPD_ERR_DPU_ALREADY_ENABLED +
-    1)  # api/include/lowlevel/dpu_vpd_structures.h: 170
+    1)  # api/include/lowlevel/dpu_vpd_structures.h: 172
 
-# api/include/lowlevel/dpu_vpd_structures.h: 170
+# api/include/lowlevel/dpu_vpd_structures.h: 172
 DPU_VPD_ERR_OVERFLOW = (DPU_VPD_ERR_DPU_ALREADY_DISABLED + 1)
 
-# api/include/lowlevel/dpu_vpd_structures.h: 170
+# api/include/lowlevel/dpu_vpd_structures.h: 172
 DPU_VPD_ERR = (DPU_VPD_ERR_OVERFLOW + 1)
 
-# api/include/lowlevel/dpu_vpd.h: 26
+# api/include/lowlevel/dpu_vpd.h: 25
 if _libs["libdpuvpd.so"].has("dpu_vpd_get_vpd_path", "cdecl"):
     dpu_vpd_get_vpd_path = _libs["libdpuvpd.so"].get(
         "dpu_vpd_get_vpd_path", "cdecl")
     dpu_vpd_get_vpd_path.argtypes = [String, String]
     dpu_vpd_get_vpd_path.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 36
+# api/include/lowlevel/dpu_vpd.h: 35
 if _libs["libdpuvpd.so"].has("dpu_vpd_init", "cdecl"):
     dpu_vpd_init = _libs["libdpuvpd.so"].get("dpu_vpd_init", "cdecl")
     dpu_vpd_init.argtypes = [String, POINTER(struct_dpu_vpd)]
     dpu_vpd_init.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 47
+# api/include/lowlevel/dpu_vpd.h: 46
 if _libs["libdpuvpd.so"].has("dpu_vpd_db_init", "cdecl"):
     dpu_vpd_db_init = _libs["libdpuvpd.so"].get("dpu_vpd_db_init", "cdecl")
     dpu_vpd_db_init.argtypes = [
         c_int, String, POINTER(struct_dpu_vpd_database)]
     dpu_vpd_db_init.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 59
+# api/include/lowlevel/dpu_vpd.h: 58
 if _libs["libdpuvpd.so"].has("dpu_vpd_db_update", "cdecl"):
     dpu_vpd_db_update = _libs["libdpuvpd.so"].get("dpu_vpd_db_update", "cdecl")
     dpu_vpd_db_update.argtypes = [
@@ -1112,33 +1112,33 @@ if _libs["libdpuvpd.so"].has("dpu_vpd_db_update", "cdecl"):
         c_int]
     dpu_vpd_db_update.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 66
+# api/include/lowlevel/dpu_vpd.h: 65
 if _libs["libdpuvpd.so"].has("dpu_vpd_db_destroy", "cdecl"):
     dpu_vpd_db_destroy = _libs["libdpuvpd.so"].get(
         "dpu_vpd_db_destroy", "cdecl")
     dpu_vpd_db_destroy.argtypes = [POINTER(struct_dpu_vpd_database)]
     dpu_vpd_db_destroy.restype = None
 
-# api/include/lowlevel/dpu_vpd.h: 75
+# api/include/lowlevel/dpu_vpd.h: 74
 if _libs["libdpuvpd.so"].has("dpu_vpd_write", "cdecl"):
     dpu_vpd_write = _libs["libdpuvpd.so"].get("dpu_vpd_write", "cdecl")
     dpu_vpd_write.argtypes = [POINTER(struct_dpu_vpd), String]
     dpu_vpd_write.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 84
+# api/include/lowlevel/dpu_vpd.h: 83
 if _libs["libdpuvpd.so"].has("dpu_vpd_db_write", "cdecl"):
     dpu_vpd_db_write = _libs["libdpuvpd.so"].get("dpu_vpd_db_write", "cdecl")
     dpu_vpd_db_write.argtypes = [POINTER(struct_dpu_vpd_database), String]
     dpu_vpd_db_write.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 94
+# api/include/lowlevel/dpu_vpd.h: 93
 if _libs["libdpuvpd.so"].has("dpu_vpd_commit_to_device", "cdecl"):
     dpu_vpd_commit_to_device = _libs["libdpuvpd.so"].get(
         "dpu_vpd_commit_to_device", "cdecl")
     dpu_vpd_commit_to_device.argtypes = [POINTER(struct_dpu_vpd), String]
     dpu_vpd_commit_to_device.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 104
+# api/include/lowlevel/dpu_vpd.h: 103
 if _libs["libdpuvpd.so"].has("dpu_vpd_db_commit_to_device", "cdecl"):
     dpu_vpd_db_commit_to_device = _libs["libdpuvpd.so"].get(
         "dpu_vpd_db_commit_to_device", "cdecl")
@@ -1146,21 +1146,21 @@ if _libs["libdpuvpd.so"].has("dpu_vpd_db_commit_to_device", "cdecl"):
         POINTER(struct_dpu_vpd_database), String]
     dpu_vpd_db_commit_to_device.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 114
+# api/include/lowlevel/dpu_vpd.h: 113
 if _libs["libdpuvpd.so"].has("dpu_vpd_commit_to_device_from_file", "cdecl"):
     dpu_vpd_commit_to_device_from_file = _libs["libdpuvpd.so"].get(
         "dpu_vpd_commit_to_device_from_file", "cdecl")
     dpu_vpd_commit_to_device_from_file.argtypes = [String, String]
     dpu_vpd_commit_to_device_from_file.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 124
+# api/include/lowlevel/dpu_vpd.h: 123
 if _libs["libdpuvpd.so"].has("dpu_vpd_db_commit_to_device_from_file", "cdecl"):
     dpu_vpd_db_commit_to_device_from_file = _libs["libdpuvpd.so"].get(
         "dpu_vpd_db_commit_to_device_from_file", "cdecl")
     dpu_vpd_db_commit_to_device_from_file.argtypes = [String, String]
     dpu_vpd_db_commit_to_device_from_file.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 134
+# api/include/lowlevel/dpu_vpd.h: 133
 if _libs["libdpuvpd.so"].has("dpu_vpd_add_repair_entry", "cdecl"):
     dpu_vpd_add_repair_entry = _libs["libdpuvpd.so"].get(
         "dpu_vpd_add_repair_entry", "cdecl")
@@ -1169,7 +1169,7 @@ if _libs["libdpuvpd.so"].has("dpu_vpd_add_repair_entry", "cdecl"):
         POINTER(struct_dpu_vpd_repair_entry)]
     dpu_vpd_add_repair_entry.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 145
+# api/include/lowlevel/dpu_vpd.h: 144
 if _libs["libdpuvpd.so"].has("dpu_vpd_disable_dpu", "cdecl"):
     dpu_vpd_disable_dpu = _libs["libdpuvpd.so"].get(
         "dpu_vpd_disable_dpu", "cdecl")
@@ -1177,7 +1177,7 @@ if _libs["libdpuvpd.so"].has("dpu_vpd_disable_dpu", "cdecl"):
         POINTER(struct_dpu_vpd), uint8_t, uint8_t, uint8_t]
     dpu_vpd_disable_dpu.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 156
+# api/include/lowlevel/dpu_vpd.h: 155
 if _libs["libdpuvpd.so"].has("dpu_vpd_enable_dpu", "cdecl"):
     dpu_vpd_enable_dpu = _libs["libdpuvpd.so"].get(
         "dpu_vpd_enable_dpu", "cdecl")
@@ -1185,37 +1185,37 @@ if _libs["libdpuvpd.so"].has("dpu_vpd_enable_dpu", "cdecl"):
         POINTER(struct_dpu_vpd), uint8_t, uint8_t, uint8_t]
     dpu_vpd_enable_dpu.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd_structures.h: 22
+# api/include/lowlevel/dpu_vpd_structures.h: 24
 try:
     VPD_MAX_RANK = 4
 except BaseException:
     pass
 
-# api/include/lowlevel/dpu_vpd_structures.h: 28
+# api/include/lowlevel/dpu_vpd_structures.h: 30
 try:
     VPD_STRUCT_ID = 'UPMV'
 except BaseException:
     pass
 
-# api/include/lowlevel/dpu_vpd_structures.h: 34
+# api/include/lowlevel/dpu_vpd_structures.h: 36
 try:
     VPD_STRUCT_VERSION = 0x0004000
 except BaseException:
     pass
 
-# api/include/lowlevel/dpu_vpd_structures.h: 40
+# api/include/lowlevel/dpu_vpd_structures.h: 42
 try:
     VPD_MAX_SIZE = 2048
 except BaseException:
     pass
 
-# api/include/lowlevel/dpu_vpd_structures.h: 46
+# api/include/lowlevel/dpu_vpd_structures.h: 48
 try:
     VPD_UNDEFINED_REPAIR_COUNT = (uint16_t(ord_if_char((-1)))).value
 except BaseException:
     pass
 
-# api/include/lowlevel/dpu_vpd_structures.h: 119
+# api/include/lowlevel/dpu_vpd_structures.h: 121
 try:
     NB_MAX_REPAIR = (
         (VPD_MAX_SIZE -
@@ -1302,21 +1302,21 @@ try:
 except BaseException:
     pass
 
-# api/include/lowlevel/dpu_vpd_structures.h: 61
+# api/include/lowlevel/dpu_vpd_structures.h: 63
 dpu_vpd_rank_data = struct_dpu_vpd_rank_data
 
-# api/include/lowlevel/dpu_vpd_structures.h: 73
+# api/include/lowlevel/dpu_vpd_structures.h: 75
 dpu_vpd_repair_entry = struct_dpu_vpd_repair_entry
 
-# api/include/lowlevel/dpu_vpd_structures.h: 95
+# api/include/lowlevel/dpu_vpd_structures.h: 97
 dpu_vpd_header = struct_dpu_vpd_header
 
-dpu_vpd = struct_dpu_vpd  # api/include/lowlevel/dpu_vpd_structures.h: 136
+dpu_vpd = struct_dpu_vpd  # api/include/lowlevel/dpu_vpd_structures.h: 138
 
-# api/include/lowlevel/dpu_vpd_structures.h: 146
+# api/include/lowlevel/dpu_vpd_structures.h: 148
 dpu_vpd_string_pair = struct_dpu_vpd_string_pair
 
-# api/include/lowlevel/dpu_vpd_structures.h: 162
+# api/include/lowlevel/dpu_vpd_structures.h: 164
 dpu_vpd_database = struct_dpu_vpd_database
 
 # No inserted files

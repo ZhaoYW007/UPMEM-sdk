@@ -33,7 +33,7 @@ mem_alloc_nolock(size_t size)
                      "\tjltu %[nhp], %[max_size], 2f\n"
                      "\t1:fault " __STR(__FAULT_ALLOC_HEAP_FULL__) "\n"
                      "\t2:\n"
-                     : [nhp] "=r"(new_heap_pointer)
+                     : [nhp] "=&r"(new_heap_pointer)
                      : [ptr] "r"(pointer), [sz] "r"(size),
                        [max_size] "r"((unsigned int)(&__sys_heap_pointer_end))
                      );

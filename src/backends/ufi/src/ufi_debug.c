@@ -24,6 +24,8 @@
 #include <ufi/ufi_ci.h>
 #include <ufi/ufi_memory.h>
 
+#include <ufi/ufi_debug.h>
+
 #define DPU_FAULT_UNKNOWN_ID (0xffffff)
 
 // We use the same coredump format for all versions of the chip.
@@ -1057,13 +1059,6 @@ __API_SYMBOL__ dpu_error_t ci_debug_restore_context_rank(struct dpu_rank_t *rank
 	}
 
 	FF(ci_commit_commands(rank, data));
-
-	/* Workarround for V1.4: ci_get_color is necessary to resynchronize the color*/
-	if (is_chip_v1_4(rank)) {
-		FF(ci_get_color(rank, (uint32_t *)&rank->debug.debug_result,
-				ci_enable_mask));
-	}
-
 end:
 	return status;
 }
@@ -1096,4 +1091,45 @@ ci_debug_restore_mux_context_rank(struct dpu_rank_t *rank)
 	}
 
 	return DPU_OK;
+}
+
+__attribute__((used)) setup_for_onboot_return
+setup_for_onboot(struct dpu_t *dpu)
+{
+	const dpuinstruction_t bkp_instr = 0x7e6320000000;
+	dpuinstruction_t instr;
+	dpu_error_t status = DPU_OK;
+	setup_for_onboot_return res;
+
+	/* Get the very first instruction. */
+	status = dpu_copy_from_iram_for_dpu(dpu, &instr, 0, 1);
+
+	if (status != DPU_OK) {
+		LOG_RANK(WARNING, dpu->rank,
+			 "Could not copy instruction from IRAM.");
+		res.status = status;
+		res.instr = 0x1;
+		return res;
+	}
+
+	/* Set the first instruction to a breakpoint. */
+	status = dpu_copy_to_iram_for_dpu(dpu, 0, &bkp_instr, 1);
+
+	if (status != DPU_OK) {
+		LOG_RANK(WARNING, dpu->rank,
+			 "Could not set instruction to IRAM.");
+		res.status = status;
+		res.instr = 0x2;
+		return res;
+	}
+
+	res.status = status;
+	res.instr = instr;
+	return res;
+}
+
+dpu_error_t host_synchronize(struct dpu_rank_t *rank)
+{
+	return ci_get_color(rank, (uint32_t *)&rank->debug.debug_result,
+			    rank->description->hw.topology.ci_mask);
 }

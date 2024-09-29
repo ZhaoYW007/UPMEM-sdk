@@ -43,7 +43,6 @@
 #include <stddef.h>
 
 /**
- * @fn buddy_init
  * @brief Allocates size_of_heap bytes for a heap that <code>buddy_alloc</code> can access to.
  *
  * Reserves memory space in the heap used to perform dynamic allocation and release of buffers.
@@ -54,7 +53,6 @@ void
 buddy_init(size_t size_of_heap);
 
 /**
- * @fn buddy_reset
  * @brief Resets the heap.
  *
  * Quickly frees all pointers allocated by <code>buddy_alloc</code> or <code>buddy_realloc</code>.
@@ -64,7 +62,6 @@ void
 buddy_reset(void);
 
 /**
- * @fn buddy_alloc
  * @brief Allocates a buffer of the given size in the heap, in a thread-safe way.
  *
  * The allocated buffer is aligned on 64 bits, in order to ensure compatibility
@@ -94,7 +91,6 @@ void *
 buddy_alloc(size_t size);
 
 /**
- * @fn buddy_free
  * @brief Frees a specified pointer, in a thread-safe way.
  *
  *  Warning :
@@ -122,7 +118,6 @@ void
 buddy_free(void *pointer);
 
 /**
- * @fn buddy_realloc
  * @brief Changes the size of the memory block pointed to by <code>ptr</code> to <code>size</code> bytes in a thread-safe way.
  *
  * The contents will be unchanged in the range from the start of the region up to the minimum of the old and new sizes.

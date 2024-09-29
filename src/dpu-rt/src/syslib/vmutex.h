@@ -30,13 +30,12 @@
  * @brief structure holding virtual mutexes
  */
 struct vmutex {
-    uint8_t *vm;
-    uint8_t *hw_mutexes;
-    uint8_t hw_mutexes_mask;
+    uint8_t *vm; /**< virtual mutexes */
+    uint8_t *hw_mutexes; /**< hardware mutexes */
+    uint8_t hw_mutexes_mask; /**< mask for hardware mutexes */
 };
 
 /**
- * @def VMUTEX_INIT
  * @brief initialize the specified number of virtual mutexes using the specified number of hardware mutexes
  * The number of virtual mutexes should be a multiple of 8
  * The number of hardware mutexes should be a power of 2
@@ -50,7 +49,6 @@ struct vmutex {
     struct vmutex NAME = { .vm = vmutex_##NAME, .hw_mutexes = hw_mutexes_##NAME, .hw_mutexes_mask = NB_MUTEXES - 1 };
 
 /**
- * @fn vmutex_lock
  * @brief Takes the lock on the given virtual mutex.
  * @param vm the virtual mutex structure
  * @param id the id of the virtual mutex to lock
@@ -81,7 +79,6 @@ vmutex_lock(struct vmutex *vm, uint16_t id)
 }
 
 /**
- * @fn vmutex_unlock
  * @brief Releases the lock on the given virtual mutex.
  * @param vm the virtual mutex structure
  * @param id the id of the virtual mutex to unlock

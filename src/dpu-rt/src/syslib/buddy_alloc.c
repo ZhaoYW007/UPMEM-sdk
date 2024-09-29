@@ -237,12 +237,14 @@ safe_buddy_alloc(size_t size)
     return NULL;
 }
 
+/// @cond INTERNAL
 typedef struct _buddy_search_context_t {
     unsigned int target_level;
     unsigned int real_index;
     unsigned int highlight_target_bit;
     unsigned int highlight_buddy_bit;
 } * buddy_search_context_t;
+/// @endcond
 
 int
 buddy_search_for_pointer(void *pointer, buddy_search_context_t context)

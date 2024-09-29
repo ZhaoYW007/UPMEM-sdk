@@ -36,12 +36,14 @@ set(COMMONS_SOURCES
         )
 
 set(SOURCES
+        src/api/dpu_bank_interface_pmc.c
         src/api/dpu_thread_job.c
         src/api/dpu_polling.c
         src/api/dpu_loader.c
         src/api/dpu_runner.c
         src/api/dpu_set.c
         src/api/dpu_memory.c
+        src/api/dpu_fifo.c
         src/api/dpu_checkpoint.c
         src/api/dpu_python_wrappers.c
         src/dpu_custom.c
@@ -64,6 +66,7 @@ set(SOURCES
         ../ufi/src/ufi.c
         ../ufi/src/ufi_bit_config.c
         ../ufi/src/ufi_dma_wavegen_config.c
+	../ufi/src/ufi_bank_interface_pmc.c
         ../ufi/src/ufi_ci.c
         ../ufi/src/ufi_config.c
         ../ufi/src/ufi_debug.c

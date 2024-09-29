@@ -15,6 +15,13 @@
 #include <string.h>
 
 /**
+ * @brief Attribute to mark a function as maybe unused.
+ * Should be used in header-implemented functions.
+ * @hideinitializer
+ */
+#define __MAYBE_UNUSED__ __attribute__((unused))
+
+/**
  * @brief The different DPU backend types.
  */
 typedef enum _dpu_type_t {
@@ -33,7 +40,7 @@ typedef enum _dpu_type_t {
  * @param dpu_type the DPU type to stringify
  * @return The string associated to the DPU type.
  */
-static inline const char *
+__MAYBE_UNUSED__ static inline const char *
 dpu_type_to_string(dpu_type_t dpu_type)
 {
     switch (dpu_type) {
@@ -60,7 +67,7 @@ dpu_type_to_string(dpu_type_t dpu_type)
  * @param dpu_type storage for the parsed DPU type
  * @return Whether the string could be parsed into a valid DPU type.
  */
-static inline bool
+__MAYBE_UNUSED__ static inline bool
 dpu_type_from_profile_string(const char *string, dpu_type_t *dpu_type)
 {
     if (strcmp(string, "simulator") == 0) {

@@ -997,129 +997,134 @@ struct__IO_FILE._fields_ = [
     ('_unused2', c_char * int((((15 * sizeof(c_int)) - (4 * sizeof(POINTER(None)))) - sizeof(c_size_t)))),
 ]
 
-enum_dpu_error_t = c_int  # dpu_error.h: 105
+enum_dpu_error_t = c_int  # dpu_error.h: 109
 
-DPU_OK = 0  # dpu_error.h: 105
+DPU_OK = 0  # dpu_error.h: 109
 
-DPU_ERR_INTERNAL = (DPU_OK + 1)  # dpu_error.h: 105
+DPU_ERR_INTERNAL = (DPU_OK + 1)  # dpu_error.h: 109
 
-DPU_ERR_SYSTEM = (DPU_ERR_INTERNAL + 1)  # dpu_error.h: 105
+DPU_ERR_SYSTEM = (DPU_ERR_INTERNAL + 1)  # dpu_error.h: 109
 
-DPU_ERR_DRIVER = (DPU_ERR_SYSTEM + 1)  # dpu_error.h: 105
+DPU_ERR_DRIVER = (DPU_ERR_SYSTEM + 1)  # dpu_error.h: 109
 
-DPU_ERR_ALLOCATION = (DPU_ERR_DRIVER + 1)  # dpu_error.h: 105
+DPU_ERR_ALLOCATION = (DPU_ERR_DRIVER + 1)  # dpu_error.h: 109
 
-DPU_ERR_INVALID_DPU_SET = (DPU_ERR_ALLOCATION + 1)  # dpu_error.h: 105
+DPU_ERR_INVALID_DPU_SET = (DPU_ERR_ALLOCATION + 1)  # dpu_error.h: 109
 
-DPU_ERR_INVALID_THREAD_ID = (DPU_ERR_INVALID_DPU_SET + 1)  # dpu_error.h: 105
+DPU_ERR_INVALID_THREAD_ID = (DPU_ERR_INVALID_DPU_SET + 1)  # dpu_error.h: 109
 
-DPU_ERR_INVALID_NOTIFY_ID = (DPU_ERR_INVALID_THREAD_ID + 1)  # dpu_error.h: 105
+DPU_ERR_INVALID_NOTIFY_ID = (DPU_ERR_INVALID_THREAD_ID + 1)  # dpu_error.h: 109
 
 DPU_ERR_INVALID_WRAM_ACCESS = (
     DPU_ERR_INVALID_NOTIFY_ID +
-    1)  # dpu_error.h: 105
+    1)  # dpu_error.h: 109
 
 DPU_ERR_INVALID_IRAM_ACCESS = (
     DPU_ERR_INVALID_WRAM_ACCESS +
-    1)  # dpu_error.h: 105
+    1)  # dpu_error.h: 109
 
 DPU_ERR_INVALID_MRAM_ACCESS = (
     DPU_ERR_INVALID_IRAM_ACCESS +
-    1)  # dpu_error.h: 105
+    1)  # dpu_error.h: 109
 
 DPU_ERR_INVALID_SYMBOL_ACCESS = (
     DPU_ERR_INVALID_MRAM_ACCESS +
-    1)  # dpu_error.h: 105
+    1)  # dpu_error.h: 109
 
-DPU_ERR_MRAM_BUSY = (DPU_ERR_INVALID_SYMBOL_ACCESS + 1)  # dpu_error.h: 105
+DPU_ERR_MRAM_BUSY = (DPU_ERR_INVALID_SYMBOL_ACCESS + 1)  # dpu_error.h: 109
 
-DPU_ERR_TRANSFER_ALREADY_SET = (DPU_ERR_MRAM_BUSY + 1)  # dpu_error.h: 105
+DPU_ERR_TRANSFER_ALREADY_SET = (DPU_ERR_MRAM_BUSY + 1)  # dpu_error.h: 109
 
-DPU_ERR_NO_PROGRAM_LOADED = (
-    DPU_ERR_TRANSFER_ALREADY_SET +
-    1)  # dpu_error.h: 105
+DPU_ERR_INVALID_PARALLEL_MEMORY_TRANSFER = (
+    DPU_ERR_TRANSFER_ALREADY_SET + 1)  # dpu_error.h: 109
+
+DPU_ERR_WRAM_FIFO_FULL = (
+    DPU_ERR_INVALID_PARALLEL_MEMORY_TRANSFER +
+    1)  # dpu_error.h: 109
+
+DPU_ERR_NO_PROGRAM_LOADED = (DPU_ERR_WRAM_FIFO_FULL + 1)  # dpu_error.h: 109
 
 DPU_ERR_DIFFERENT_DPU_PROGRAMS = (
     DPU_ERR_NO_PROGRAM_LOADED +
-    1)  # dpu_error.h: 105
+    1)  # dpu_error.h: 109
 
 DPU_ERR_CORRUPTED_MEMORY = (
     DPU_ERR_DIFFERENT_DPU_PROGRAMS +
-    1)  # dpu_error.h: 105
+    1)  # dpu_error.h: 109
 
-DPU_ERR_DPU_DISABLED = (DPU_ERR_CORRUPTED_MEMORY + 1)  # dpu_error.h: 105
+DPU_ERR_DPU_DISABLED = (DPU_ERR_CORRUPTED_MEMORY + 1)  # dpu_error.h: 109
 
-DPU_ERR_DPU_ALREADY_RUNNING = (DPU_ERR_DPU_DISABLED + 1)  # dpu_error.h: 105
+DPU_ERR_DPU_ALREADY_RUNNING = (DPU_ERR_DPU_DISABLED + 1)  # dpu_error.h: 109
 
 DPU_ERR_INVALID_MEMORY_TRANSFER = (
     DPU_ERR_DPU_ALREADY_RUNNING +
-    1)  # dpu_error.h: 105
+    1)  # dpu_error.h: 109
 
 DPU_ERR_INVALID_LAUNCH_POLICY = (
     DPU_ERR_INVALID_MEMORY_TRANSFER +
-    1)  # dpu_error.h: 105
+    1)  # dpu_error.h: 109
 
-DPU_ERR_DPU_FAULT = (DPU_ERR_INVALID_LAUNCH_POLICY + 1)  # dpu_error.h: 105
+DPU_ERR_DPU_FAULT = (DPU_ERR_INVALID_LAUNCH_POLICY + 1)  # dpu_error.h: 109
 
-DPU_ERR_ELF_INVALID_FILE = (DPU_ERR_DPU_FAULT + 1)  # dpu_error.h: 105
+DPU_ERR_ELF_INVALID_FILE = (DPU_ERR_DPU_FAULT + 1)  # dpu_error.h: 109
 
-DPU_ERR_ELF_NO_SUCH_FILE = (DPU_ERR_ELF_INVALID_FILE + 1)  # dpu_error.h: 105
+DPU_ERR_ELF_NO_SUCH_FILE = (DPU_ERR_ELF_INVALID_FILE + 1)  # dpu_error.h: 109
 
 DPU_ERR_ELF_NO_SUCH_SECTION = (
     DPU_ERR_ELF_NO_SUCH_FILE +
-    1)  # dpu_error.h: 105
+    1)  # dpu_error.h: 109
 
-DPU_ERR_TIMEOUT = (DPU_ERR_ELF_NO_SUCH_SECTION + 1)  # dpu_error.h: 105
+DPU_ERR_TIMEOUT = (DPU_ERR_ELF_NO_SUCH_SECTION + 1)  # dpu_error.h: 109
 
-DPU_ERR_INVALID_PROFILE = (DPU_ERR_TIMEOUT + 1)  # dpu_error.h: 105
+DPU_ERR_INVALID_PROFILE = (DPU_ERR_TIMEOUT + 1)  # dpu_error.h: 109
 
-DPU_ERR_UNKNOWN_SYMBOL = (DPU_ERR_INVALID_PROFILE + 1)  # dpu_error.h: 105
+DPU_ERR_UNKNOWN_SYMBOL = (DPU_ERR_INVALID_PROFILE + 1)  # dpu_error.h: 109
 
-DPU_ERR_LOG_FORMAT = (DPU_ERR_UNKNOWN_SYMBOL + 1)  # dpu_error.h: 105
+DPU_ERR_LOG_FORMAT = (DPU_ERR_UNKNOWN_SYMBOL + 1)  # dpu_error.h: 109
 
-DPU_ERR_LOG_CONTEXT_MISSING = (DPU_ERR_LOG_FORMAT + 1)  # dpu_error.h: 105
+DPU_ERR_LOG_CONTEXT_MISSING = (DPU_ERR_LOG_FORMAT + 1)  # dpu_error.h: 109
 
 DPU_ERR_LOG_BUFFER_TOO_SMALL = (
     DPU_ERR_LOG_CONTEXT_MISSING +
-    1)  # dpu_error.h: 105
+    1)  # dpu_error.h: 109
 
 DPU_ERR_VPD_INVALID_FILE = (
     DPU_ERR_LOG_BUFFER_TOO_SMALL +
-    1)  # dpu_error.h: 105
+    1)  # dpu_error.h: 109
 
-DPU_ERR_VPD_NO_REPAIR = (DPU_ERR_VPD_INVALID_FILE + 1)  # dpu_error.h: 105
+DPU_ERR_VPD_NO_REPAIR = (DPU_ERR_VPD_INVALID_FILE + 1)  # dpu_error.h: 109
 
-DPU_ERR_NO_THREAD_PER_RANK = (DPU_ERR_VPD_NO_REPAIR + 1)  # dpu_error.h: 105
+DPU_ERR_NO_THREAD_PER_RANK = (DPU_ERR_VPD_NO_REPAIR + 1)  # dpu_error.h: 109
 
 DPU_ERR_INVALID_BUFFER_SIZE = (
     DPU_ERR_NO_THREAD_PER_RANK +
-    1)  # dpu_error.h: 105
+    1)  # dpu_error.h: 109
 
 DPU_ERR_NONBLOCKING_SYNC_CALLBACK = (
     DPU_ERR_INVALID_BUFFER_SIZE +
-    1)  # dpu_error.h: 105
+    1)  # dpu_error.h: 109
 
 DPU_ERR_TOO_MANY_TASKLETS = (
     DPU_ERR_NONBLOCKING_SYNC_CALLBACK +
-    1)  # dpu_error.h: 105
+    1)  # dpu_error.h: 109
 
 DPU_ERR_SG_TOO_MANY_BLOCKS = (
     DPU_ERR_TOO_MANY_TASKLETS +
-    1)  # dpu_error.h: 105
+    1)  # dpu_error.h: 109
 
 DPU_ERR_SG_LENGTH_MISMATCH = (
     DPU_ERR_SG_TOO_MANY_BLOCKS +
-    1)  # dpu_error.h: 105
+    1)  # dpu_error.h: 109
 
-DPU_ERR_SG_NOT_ACTIVATED = (DPU_ERR_SG_LENGTH_MISMATCH + 1)  # dpu_error.h: 105
+DPU_ERR_SG_NOT_ACTIVATED = (DPU_ERR_SG_LENGTH_MISMATCH + 1)  # dpu_error.h: 109
 
-DPU_ERR_SG_NOT_MRAM_SYMBOL = (DPU_ERR_SG_NOT_ACTIVATED + 1)  # dpu_error.h: 105
+DPU_ERR_SG_NOT_MRAM_SYMBOL = (DPU_ERR_SG_NOT_ACTIVATED + 1)  # dpu_error.h: 109
 
-DPU_ERR_ASYNC_JOBS = (c_int(ord_if_char((1 << 31)))).value  # dpu_error.h: 105
+DPU_ERR_ASYNC_JOBS = (c_int(ord_if_char((1 << 31)))).value  # dpu_error.h: 109
 
-dpu_error_t = enum_dpu_error_t  # dpu_error.h: 105
+dpu_error_t = enum_dpu_error_t  # dpu_error.h: 109
 
-# dpu_error.h: 113
+# dpu_error.h: 117
 if _libs["libdpu.so"].has("dpu_error_to_string", "cdecl"):
     dpu_error_to_string = _libs["libdpu.so"].get(
         "dpu_error_to_string", "cdecl")
@@ -1267,7 +1272,7 @@ class struct_dpu_rank_t(Structure):
 class struct_dpu_t(Structure):
     pass
 
-# dpu_types.h: 226
+# <backends>/api/include/lowlevel/dpu_transfer_matrix.h: 38
 
 
 class struct_dpu_transfer_matrix(Structure):
@@ -1639,85 +1644,170 @@ if _libs["libdpu.so"].has("dpu_checkpoint_free", "cdecl"):
     dpu_checkpoint_free.argtypes = [POINTER(struct_dpu_context_t)]
     dpu_checkpoint_free.restype = dpu_error_t
 
-enum__dpu_launch_policy_t = c_int  # dpu.h: 59
+# <backends>/api/include/lowlevel/dpu_transfer_matrix.h: 40
 
-DPU_ASYNCHRONOUS = 0  # dpu.h: 59
 
-DPU_SYNCHRONOUS = (DPU_ASYNCHRONOUS + 1)  # dpu.h: 59
+class union_anon_27(Union):
+    pass
 
-dpu_launch_policy_t = enum__dpu_launch_policy_t  # dpu.h: 59
 
-enum__dpu_xfer_t = c_int  # dpu.h: 69
+union_anon_27.__slots__ = [
+    'ptr',
+    'sg_ptr',
+]
+union_anon_27._fields_ = [
+    ('ptr', POINTER(None) * int(64)),
+    ('sg_ptr', POINTER(struct_sg_xfer_buffer) * int(64)),
+]
 
-DPU_XFER_TO_DPU = 0  # dpu.h: 69
+struct_dpu_transfer_matrix.__slots__ = [
+    'unnamed_1',
+    'offset',
+    'size',
+    'type',
+]
+struct_dpu_transfer_matrix._anonymous_ = [
+    'unnamed_1',
+]
+struct_dpu_transfer_matrix._fields_ = [
+    ('unnamed_1', union_anon_27),
+    ('offset', uint32_t),
+    ('size', uint32_t),
+    ('type', dpu_transfer_matrix_type_t),
+]
 
-DPU_XFER_FROM_DPU = (DPU_XFER_TO_DPU + 1)  # dpu.h: 69
+# <backends>/api/include/lowlevel/dpu_fifo.h: 23
 
-dpu_xfer_t = enum__dpu_xfer_t  # dpu.h: 69
 
-enum__dpu_xfer_flags_t = c_int  # dpu.h: 84
+class struct_dpu_fifo_rank_t(Structure):
+    pass
 
-DPU_XFER_DEFAULT = 0  # dpu.h: 84
 
-DPU_XFER_NO_RESET = (1 << 0)  # dpu.h: 84
+struct_dpu_fifo_rank_t.__slots__ = [
+    'dpu_fifo_ptr_size',
+    'dpu_fifo_address',
+    'dpu_fifo_data_size',
+    'dpu_fifo_pointers',
+    'fifo_pointers_matrix',
+    'transfer_matrix',
+    'max_retries',
+    'time_for_retry',
+]
+struct_dpu_fifo_rank_t._fields_ = [
+    ('dpu_fifo_ptr_size', uint8_t),
+    ('dpu_fifo_address', uint32_t),
+    ('dpu_fifo_data_size', uint32_t),
+    ('dpu_fifo_pointers', uint64_t * int((64 * 2))),
+    ('fifo_pointers_matrix', struct_dpu_transfer_matrix),
+    ('transfer_matrix', struct_dpu_transfer_matrix),
+    ('max_retries', uint32_t),
+    ('time_for_retry', uint32_t),
+]
 
-DPU_XFER_ASYNC = (1 << 1)  # dpu.h: 84
+# <backends>/api/include/lowlevel/dpu_fifo.h: 56
+enum_dpu_fifo_direction_t = c_int
 
-dpu_xfer_flags_t = enum__dpu_xfer_flags_t  # dpu.h: 84
+# <backends>/api/include/lowlevel/dpu_fifo.h: 63
 
-enum__dpu_sg_xfer_flags_t = c_int  # dpu.h: 104
 
-DPU_SG_XFER_DEFAULT = 0  # dpu.h: 104
+class struct_dpu_fifo_link_t(Structure):
+    pass
 
-DPU_SG_XFER_ASYNC = (1 << 1)  # dpu.h: 104
 
-DPU_SG_XFER_DISABLE_LENGTH_CHECK = (1 << 2)  # dpu.h: 104
+struct_dpu_fifo_link_t.__slots__ = [
+    'direction',
+    'fifo_symbol',
+    'rank_fifos',
+]
+struct_dpu_fifo_link_t._fields_ = [
+    ('direction', enum_dpu_fifo_direction_t),
+    ('fifo_symbol', struct_dpu_symbol_t),
+    ('rank_fifos', POINTER(struct_dpu_fifo_rank_t)),
+]
 
-dpu_sg_xfer_flags_t = enum__dpu_sg_xfer_flags_t  # dpu.h: 104
+enum__dpu_launch_policy_t = c_int  # dpu.h: 61
 
-enum__dpu_callback_flags_t = c_int  # dpu.h: 124
+DPU_ASYNCHRONOUS = 0  # dpu.h: 61
 
-DPU_CALLBACK_DEFAULT = 0  # dpu.h: 124
+DPU_SYNCHRONOUS = (DPU_ASYNCHRONOUS + 1)  # dpu.h: 61
 
-DPU_CALLBACK_ASYNC = (1 << 0)  # dpu.h: 124
+dpu_launch_policy_t = enum__dpu_launch_policy_t  # dpu.h: 61
 
-DPU_CALLBACK_NONBLOCKING = (1 << 1)  # dpu.h: 124
+enum__dpu_xfer_t = c_int  # dpu.h: 71
 
-DPU_CALLBACK_SINGLE_CALL = (1 << 2)  # dpu.h: 124
+DPU_XFER_TO_DPU = 0  # dpu.h: 71
 
-dpu_callback_flags_t = enum__dpu_callback_flags_t  # dpu.h: 124
+DPU_XFER_FROM_DPU = (DPU_XFER_TO_DPU + 1)  # dpu.h: 71
 
-# dpu.h: 166
+dpu_xfer_t = enum__dpu_xfer_t  # dpu.h: 71
+
+enum__dpu_xfer_flags_t = c_int  # dpu.h: 93
+
+DPU_XFER_DEFAULT = 0  # dpu.h: 93
+
+DPU_XFER_NO_RESET = (1 << 0)  # dpu.h: 93
+
+DPU_XFER_ASYNC = (1 << 1)  # dpu.h: 93
+
+DPU_XFER_PARALLEL = (1 << 2)  # dpu.h: 93
+
+dpu_xfer_flags_t = enum__dpu_xfer_flags_t  # dpu.h: 93
+
+enum__dpu_sg_xfer_flags_t = c_int  # dpu.h: 113
+
+DPU_SG_XFER_DEFAULT = 0  # dpu.h: 113
+
+DPU_SG_XFER_ASYNC = (1 << 1)  # dpu.h: 113
+
+DPU_SG_XFER_DISABLE_LENGTH_CHECK = (1 << 2)  # dpu.h: 113
+
+dpu_sg_xfer_flags_t = enum__dpu_sg_xfer_flags_t  # dpu.h: 113
+
+enum__dpu_callback_flags_t = c_int  # dpu.h: 138
+
+DPU_CALLBACK_DEFAULT = 0  # dpu.h: 138
+
+DPU_CALLBACK_ASYNC = (1 << 0)  # dpu.h: 138
+
+DPU_CALLBACK_NONBLOCKING = (1 << 1)  # dpu.h: 138
+
+DPU_CALLBACK_SINGLE_CALL = (1 << 2)  # dpu.h: 138
+
+DPU_CALLBACK_PARALLEL = (1 << 3)  # dpu.h: 138
+
+dpu_callback_flags_t = enum__dpu_callback_flags_t  # dpu.h: 138
+
+# dpu.h: 180
 if _libs["libdpu.so"].has("dpu_alloc", "cdecl"):
     dpu_alloc = _libs["libdpu.so"].get("dpu_alloc", "cdecl")
     dpu_alloc.argtypes = [uint32_t, String, POINTER(struct_dpu_set_t)]
     dpu_alloc.restype = dpu_error_t
 
-# dpu.h: 180
+# dpu.h: 194
 if _libs["libdpu.so"].has("dpu_alloc_ranks", "cdecl"):
     dpu_alloc_ranks = _libs["libdpu.so"].get("dpu_alloc_ranks", "cdecl")
     dpu_alloc_ranks.argtypes = [uint32_t, String, POINTER(struct_dpu_set_t)]
     dpu_alloc_ranks.restype = dpu_error_t
 
-# dpu.h: 191
+# dpu.h: 205
 if _libs["libdpu.so"].has("dpu_free", "cdecl"):
     dpu_free = _libs["libdpu.so"].get("dpu_free", "cdecl")
     dpu_free.argtypes = [struct_dpu_set_t]
     dpu_free.restype = dpu_error_t
 
-# dpu.h: 200
+# dpu.h: 214
 if _libs["libdpu.so"].has("dpu_get_nr_ranks", "cdecl"):
     dpu_get_nr_ranks = _libs["libdpu.so"].get("dpu_get_nr_ranks", "cdecl")
     dpu_get_nr_ranks.argtypes = [struct_dpu_set_t, POINTER(uint32_t)]
     dpu_get_nr_ranks.restype = dpu_error_t
 
-# dpu.h: 209
+# dpu.h: 223
 if _libs["libdpu.so"].has("dpu_get_nr_dpus", "cdecl"):
     dpu_get_nr_dpus = _libs["libdpu.so"].get("dpu_get_nr_dpus", "cdecl")
     dpu_get_nr_dpus.argtypes = [struct_dpu_set_t, POINTER(uint32_t)]
     dpu_get_nr_dpus.restype = dpu_error_t
 
-# dpu.h: 273
+# dpu.h: 287
 
 
 class struct_dpu_set_rank_iterator_t(Structure):
@@ -1739,7 +1829,7 @@ struct_dpu_set_rank_iterator_t._fields_ = [
     ('next', struct_dpu_set_t),
 ]
 
-# dpu.h: 287
+# dpu.h: 301
 
 
 class struct_dpu_set_dpu_iterator_t(Structure):
@@ -1761,14 +1851,14 @@ struct_dpu_set_dpu_iterator_t._fields_ = [
     ('next', struct_dpu_set_t),
 ]
 
-# dpu.h: 305
+# dpu.h: 319
 if _libs["libdpu.so"].has("dpu_set_rank_iterator_from", "cdecl"):
     dpu_set_rank_iterator_from = _libs["libdpu.so"].get(
         "dpu_set_rank_iterator_from", "cdecl")
     dpu_set_rank_iterator_from.argtypes = [POINTER(struct_dpu_set_t)]
     dpu_set_rank_iterator_from.restype = struct_dpu_set_rank_iterator_t
 
-# dpu.h: 316
+# dpu.h: 330
 if _libs["libdpu.so"].has("dpu_set_rank_iterator_next", "cdecl"):
     dpu_set_rank_iterator_next = _libs["libdpu.so"].get(
         "dpu_set_rank_iterator_next", "cdecl")
@@ -1776,14 +1866,14 @@ if _libs["libdpu.so"].has("dpu_set_rank_iterator_next", "cdecl"):
         POINTER(struct_dpu_set_rank_iterator_t)]
     dpu_set_rank_iterator_next.restype = None
 
-# dpu.h: 328
+# dpu.h: 342
 if _libs["libdpu.so"].has("dpu_set_dpu_iterator_from", "cdecl"):
     dpu_set_dpu_iterator_from = _libs["libdpu.so"].get(
         "dpu_set_dpu_iterator_from", "cdecl")
     dpu_set_dpu_iterator_from.argtypes = [POINTER(struct_dpu_set_t)]
     dpu_set_dpu_iterator_from.restype = struct_dpu_set_dpu_iterator_t
 
-# dpu.h: 339
+# dpu.h: 353
 if _libs["libdpu.so"].has("dpu_set_dpu_iterator_next", "cdecl"):
     dpu_set_dpu_iterator_next = _libs["libdpu.so"].get(
         "dpu_set_dpu_iterator_next", "cdecl")
@@ -1791,7 +1881,7 @@ if _libs["libdpu.so"].has("dpu_set_dpu_iterator_next", "cdecl"):
         POINTER(struct_dpu_set_dpu_iterator_t)]
     dpu_set_dpu_iterator_next.restype = None
 
-# dpu.h: 351
+# dpu.h: 365
 if _libs["libdpu.so"].has("dpu_load_from_memory", "cdecl"):
     dpu_load_from_memory = _libs["libdpu.so"].get(
         "dpu_load_from_memory", "cdecl")
@@ -1800,7 +1890,7 @@ if _libs["libdpu.so"].has("dpu_load_from_memory", "cdecl"):
             POINTER(struct_dpu_program_t))]
     dpu_load_from_memory.restype = dpu_error_t
 
-# dpu.h: 362
+# dpu.h: 376
 if _libs["libdpu.so"].has("dpu_load_from_incbin", "cdecl"):
     dpu_load_from_incbin = _libs["libdpu.so"].get(
         "dpu_load_from_incbin", "cdecl")
@@ -1809,7 +1899,7 @@ if _libs["libdpu.so"].has("dpu_load_from_incbin", "cdecl"):
             POINTER(struct_dpu_program_t))]
     dpu_load_from_incbin.restype = dpu_error_t
 
-# dpu.h: 373
+# dpu.h: 387
 if _libs["libdpu.so"].has("dpu_load", "cdecl"):
     dpu_load = _libs["libdpu.so"].get("dpu_load", "cdecl")
     dpu_load.argtypes = [
@@ -1817,7 +1907,7 @@ if _libs["libdpu.so"].has("dpu_load", "cdecl"):
             POINTER(struct_dpu_program_t))]
     dpu_load.restype = dpu_error_t
 
-# dpu.h: 383
+# dpu.h: 397
 if _libs["libdpu.so"].has("dpu_get_symbol", "cdecl"):
     dpu_get_symbol = _libs["libdpu.so"].get("dpu_get_symbol", "cdecl")
     dpu_get_symbol.argtypes = [
@@ -1826,25 +1916,25 @@ if _libs["libdpu.so"].has("dpu_get_symbol", "cdecl"):
         POINTER(struct_dpu_symbol_t)]
     dpu_get_symbol.restype = dpu_error_t
 
-# dpu.h: 392
+# dpu.h: 406
 if _libs["libdpu.so"].has("dpu_launch", "cdecl"):
     dpu_launch = _libs["libdpu.so"].get("dpu_launch", "cdecl")
     dpu_launch.argtypes = [struct_dpu_set_t, dpu_launch_policy_t]
     dpu_launch.restype = dpu_error_t
 
-# dpu.h: 402
+# dpu.h: 416
 if _libs["libdpu.so"].has("dpu_status", "cdecl"):
     dpu_status = _libs["libdpu.so"].get("dpu_status", "cdecl")
     dpu_status.argtypes = [struct_dpu_set_t, POINTER(c_bool), POINTER(c_bool)]
     dpu_status.restype = dpu_error_t
 
-# dpu.h: 410
+# dpu.h: 424
 if _libs["libdpu.so"].has("dpu_sync", "cdecl"):
     dpu_sync = _libs["libdpu.so"].get("dpu_sync", "cdecl")
     dpu_sync.argtypes = [struct_dpu_set_t]
     dpu_sync.restype = dpu_error_t
 
-# dpu.h: 422
+# dpu.h: 436
 if _libs["libdpu.so"].has("dpu_copy_to", "cdecl"):
     dpu_copy_to = _libs["libdpu.so"].get("dpu_copy_to", "cdecl")
     dpu_copy_to.argtypes = [
@@ -1855,7 +1945,7 @@ if _libs["libdpu.so"].has("dpu_copy_to", "cdecl"):
         c_size_t]
     dpu_copy_to.restype = dpu_error_t
 
-# dpu.h: 434
+# dpu.h: 448
 if _libs["libdpu.so"].has("dpu_copy_from", "cdecl"):
     dpu_copy_from = _libs["libdpu.so"].get("dpu_copy_from", "cdecl")
     dpu_copy_from.argtypes = [
@@ -1866,7 +1956,7 @@ if _libs["libdpu.so"].has("dpu_copy_from", "cdecl"):
         c_size_t]
     dpu_copy_from.restype = dpu_error_t
 
-# dpu.h: 446
+# dpu.h: 460
 if _libs["libdpu.so"].has("dpu_copy_to_symbol", "cdecl"):
     dpu_copy_to_symbol = _libs["libdpu.so"].get("dpu_copy_to_symbol", "cdecl")
     dpu_copy_to_symbol.argtypes = [
@@ -1877,7 +1967,7 @@ if _libs["libdpu.so"].has("dpu_copy_to_symbol", "cdecl"):
         c_size_t]
     dpu_copy_to_symbol.restype = dpu_error_t
 
-# dpu.h: 458
+# dpu.h: 472
 if _libs["libdpu.so"].has("dpu_copy_from_symbol", "cdecl"):
     dpu_copy_from_symbol = _libs["libdpu.so"].get(
         "dpu_copy_from_symbol", "cdecl")
@@ -1889,13 +1979,13 @@ if _libs["libdpu.so"].has("dpu_copy_from_symbol", "cdecl"):
         c_size_t]
     dpu_copy_from_symbol.restype = dpu_error_t
 
-# dpu.h: 471
+# dpu.h: 485
 if _libs["libdpu.so"].has("dpu_prepare_xfer", "cdecl"):
     dpu_prepare_xfer = _libs["libdpu.so"].get("dpu_prepare_xfer", "cdecl")
     dpu_prepare_xfer.argtypes = [struct_dpu_set_t, POINTER(None)]
     dpu_prepare_xfer.restype = dpu_error_t
 
-# dpu.h: 476
+# dpu.h: 490
 
 
 class struct_sg_block_info(Structure):
@@ -1916,9 +2006,9 @@ get_block_func_t = CFUNCTYPE(
     POINTER(struct_sg_block_info),
     uint32_t,
     uint32_t,
-    POINTER(None))  # dpu.h: 491
+    POINTER(None))  # dpu.h: 505
 
-# dpu.h: 504
+# dpu.h: 518
 
 
 class struct_get_block_t(Structure):
@@ -1936,9 +2026,9 @@ struct_get_block_t._fields_ = [
     ('args_size', c_size_t),
 ]
 
-get_block_t = struct_get_block_t  # dpu.h: 504
+get_block_t = struct_get_block_t  # dpu.h: 518
 
-# dpu.h: 525
+# dpu.h: 539
 if _libs["libdpu.so"].has("dpu_push_sg_xfer", "cdecl"):
     dpu_push_sg_xfer = _libs["libdpu.so"].get("dpu_push_sg_xfer", "cdecl")
     dpu_push_sg_xfer.argtypes = [
@@ -1951,7 +2041,7 @@ if _libs["libdpu.so"].has("dpu_push_sg_xfer", "cdecl"):
         dpu_sg_xfer_flags_t]
     dpu_push_sg_xfer.restype = dpu_error_t
 
-# dpu.h: 552
+# dpu.h: 566
 if _libs["libdpu.so"].has("dpu_push_sg_xfer_symbol", "cdecl"):
     dpu_push_sg_xfer_symbol = _libs["libdpu.so"].get(
         "dpu_push_sg_xfer_symbol", "cdecl")
@@ -1965,7 +2055,7 @@ if _libs["libdpu.so"].has("dpu_push_sg_xfer_symbol", "cdecl"):
         dpu_sg_xfer_flags_t]
     dpu_push_sg_xfer_symbol.restype = dpu_error_t
 
-# dpu.h: 576
+# dpu.h: 590
 if _libs["libdpu.so"].has("dpu_push_xfer", "cdecl"):
     dpu_push_xfer = _libs["libdpu.so"].get("dpu_push_xfer", "cdecl")
     dpu_push_xfer.argtypes = [
@@ -1977,7 +2067,7 @@ if _libs["libdpu.so"].has("dpu_push_xfer", "cdecl"):
         dpu_xfer_flags_t]
     dpu_push_xfer.restype = dpu_error_t
 
-# dpu.h: 599
+# dpu.h: 613
 if _libs["libdpu.so"].has("dpu_push_xfer_symbol", "cdecl"):
     dpu_push_xfer_symbol = _libs["libdpu.so"].get(
         "dpu_push_xfer_symbol", "cdecl")
@@ -1990,7 +2080,7 @@ if _libs["libdpu.so"].has("dpu_push_xfer_symbol", "cdecl"):
         dpu_xfer_flags_t]
     dpu_push_xfer_symbol.restype = dpu_error_t
 
-# dpu.h: 618
+# dpu.h: 632
 if _libs["libdpu.so"].has("dpu_broadcast_to", "cdecl"):
     dpu_broadcast_to = _libs["libdpu.so"].get("dpu_broadcast_to", "cdecl")
     dpu_broadcast_to.argtypes = [
@@ -2002,7 +2092,7 @@ if _libs["libdpu.so"].has("dpu_broadcast_to", "cdecl"):
         dpu_xfer_flags_t]
     dpu_broadcast_to.restype = dpu_error_t
 
-# dpu.h: 637
+# dpu.h: 651
 if _libs["libdpu.so"].has("dpu_broadcast_to_symbol", "cdecl"):
     dpu_broadcast_to_symbol = _libs["libdpu.so"].get(
         "dpu_broadcast_to_symbol", "cdecl")
@@ -2015,7 +2105,26 @@ if _libs["libdpu.so"].has("dpu_broadcast_to_symbol", "cdecl"):
         dpu_xfer_flags_t]
     dpu_broadcast_to_symbol.restype = dpu_error_t
 
-# dpu.h: 654
+# dpu.h: 667
+if _libs["libdpu.so"].has("dpu_fifo_prepare_xfer", "cdecl"):
+    dpu_fifo_prepare_xfer = _libs["libdpu.so"].get(
+        "dpu_fifo_prepare_xfer", "cdecl")
+    dpu_fifo_prepare_xfer.argtypes = [
+        struct_dpu_set_t,
+        POINTER(struct_dpu_fifo_link_t),
+        POINTER(None)]
+    dpu_fifo_prepare_xfer.restype = dpu_error_t
+
+# dpu.h: 685
+if _libs["libdpu.so"].has("dpu_fifo_push_xfer", "cdecl"):
+    dpu_fifo_push_xfer = _libs["libdpu.so"].get("dpu_fifo_push_xfer", "cdecl")
+    dpu_fifo_push_xfer.argtypes = [
+        struct_dpu_set_t,
+        POINTER(struct_dpu_fifo_link_t),
+        dpu_xfer_flags_t]
+    dpu_fifo_push_xfer.restype = dpu_error_t
+
+# dpu.h: 697
 if _libs["libdpu.so"].has("dpu_callback", "cdecl"):
     dpu_callback = _libs["libdpu.so"].get("dpu_callback", "cdecl")
     dpu_callback.argtypes = [
@@ -2029,7 +2138,7 @@ if _libs["libdpu.so"].has("dpu_callback", "cdecl"):
         dpu_callback_flags_t]
     dpu_callback.restype = dpu_error_t
 
-# dpu.h: 692
+# dpu.h: 735
 if _libs["libdpu.so"].has("dpu_log_read", "cdecl"):
     dpu_log_read = _libs["libdpu.so"].get("dpu_log_read", "cdecl")
     dpu_log_read.argtypes = [struct_dpu_set_t, POINTER(FILE)]
@@ -2041,7 +2150,7 @@ try:
 except BaseException:
     pass
 
-# dpu_error.h: 120
+# dpu_error.h: 124
 try:
     DPU_ERROR_ASYNC_JOB_TYPE_SHIFT = 16
 except BaseException:
@@ -2098,7 +2207,7 @@ try:
 except BaseException:
     pass
 
-# dpu.h: 152
+# dpu.h: 166
 try:
     DPU_ALLOCATE_ALL = UINT_MAX
 except BaseException:
@@ -2109,8 +2218,6 @@ dpu_slice_target = struct_dpu_slice_target  # dpu_types.h: 163
 dpu_rank_t = struct_dpu_rank_t  # dpu_types.h: 216
 
 dpu_t = struct_dpu_t  # dpu_types.h: 221
-
-dpu_transfer_matrix = struct_dpu_transfer_matrix  # dpu_types.h: 226
 
 dpu_set_t = struct_dpu_set_t  # dpu_types.h: 241
 
@@ -2130,13 +2237,13 @@ dpu_context_t = struct_dpu_context_t  # dpu_types.h: 368
 
 sg_xfer_buffer = struct_sg_xfer_buffer  # dpu_types.h: 426
 
-dpu_set_rank_iterator_t = struct_dpu_set_rank_iterator_t  # dpu.h: 273
+dpu_set_rank_iterator_t = struct_dpu_set_rank_iterator_t  # dpu.h: 287
 
-dpu_set_dpu_iterator_t = struct_dpu_set_dpu_iterator_t  # dpu.h: 287
+dpu_set_dpu_iterator_t = struct_dpu_set_dpu_iterator_t  # dpu.h: 301
 
-sg_block_info = struct_sg_block_info  # dpu.h: 476
+sg_block_info = struct_sg_block_info  # dpu.h: 490
 
-get_block_t = struct_get_block_t  # dpu.h: 504
+get_block_t = struct_get_block_t  # dpu.h: 518
 
 # Begin inserted files
 # Begin "<backends>/python/utils/ffi_footer.txt"

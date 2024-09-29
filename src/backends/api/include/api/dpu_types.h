@@ -11,7 +11,7 @@
  * @brief Base DPU types in the C API.
  */
 
-#include <stdint.h>
+#include <stdint.h> // IWYU pragma: export
 
 #include <dpu_target.h>
 

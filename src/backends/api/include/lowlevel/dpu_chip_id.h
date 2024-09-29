@@ -16,6 +16,13 @@
  */
 
 /**
+ * @brief Attribute to mark a function as maybe unused.
+ * Should be used in header-implemented functions.
+ * @hideinitializer
+ */
+#define __MAYBE_UNUSED__ __attribute__((unused))
+
+/**
  * @brief The different valid DPU chip IDs.
  */
 typedef enum _dpu_chip_id_e {
@@ -47,7 +54,7 @@ typedef enum _dpu_chip_id_e {
  * @param chip_id The DPU chip ID to convert
  * @return The DPU chip index associated to the DPU chip ID.
  */
-static inline unsigned int
+__MAYBE_UNUSED__ static inline unsigned int
 chip_id_to_idx(dpu_chip_id_e chip_id)
 {
     switch (chip_id) {

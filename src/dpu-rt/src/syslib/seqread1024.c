@@ -3,5 +3,6 @@
  * found in the LICENSE file.
  */
 
+#define PAGE_SIZE_LOG2 10
 #define SEQREAD_CACHE_SIZE 1024
 #include <seqread.inc>

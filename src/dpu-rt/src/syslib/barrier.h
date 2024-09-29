@@ -27,18 +27,21 @@
 #include <stdint.h>
 
 /**
+ * @struct barrier_t
+ * @brief A barrier object, as declared by BARRIER_INIT.
+ */
+/**
  * @typedef barrier_t
  * @brief A barrier object, as declared by BARRIER_INIT.
  */
 typedef struct barrier_t {
-    uint8_t wait_queue;
-    uint8_t count;
-    uint8_t initial_count;
-    uint8_t lock;
+    uint8_t wait_queue; /**< The wait queue. */
+    uint8_t count; /**< The number of tasklets that reached the barrier. */
+    uint8_t initial_count; /**< The initial number of tasklets that should reach the barrier. */
+    uint8_t lock; /**< The lock. */
 } barrier_t;
 
 /**
- * @def BARRIER_INIT
  * @hideinitializer
  * @brief Declare and initialize a barrier associated to the given name.
  */
@@ -60,7 +63,6 @@ typedef struct barrier_t {
 /* clang-format on */
 
 /**
- * @fn barrier_wait
  * @brief Decrements the counter associated to the barrier and suspends the invoking tasklet.
  *
  * The counter of the barrier is decremented and the invoking tasklet is suspended until

@@ -71,9 +71,16 @@ polling_thread_rank(struct dpu_rank_t *rank)
         return false;
     }
 
+    // The polling thread also takes care of waking up the waiting thread
+    // in case new jobs have been added to the FIFO
+    uint32_t nr_jobs_in_queue = dpu_thread_jobs_size(rank);
+    bool signal_new_job = nr_jobs_in_queue != rank->api.last_jobs_list_length;
+    rank->api.last_jobs_list_length = nr_jobs_in_queue;
+
     uint32_t nb_dpu_was_running = nb_dpu_running;
     nb_dpu_running = run_context->nb_dpu_running;
-    if (nb_dpu_was_running > nb_dpu_running) {
+
+    if ((nb_dpu_was_running > nb_dpu_running) || signal_new_job) {
         pthread_cond_broadcast(&rank->api.poll_cond);
     }
 
@@ -111,7 +118,8 @@ polling_thread_fct(void *arg)
         struct dpu_rank_t **ranks;
         dpu_rank_handler_start_iteration(&ranks, &nb_ranks);
         for (unsigned int each_rank = 0; each_rank < nb_ranks; each_rank++) {
-            if ((ranks[each_rank] == NULL) || (ranks[each_rank]->api.thread_info.queue_idx != idx)) {
+            if ((ranks[each_rank] == NULL) || (ranks[each_rank]->api.thread_info.queue_idx != idx)
+                || !ranks[each_rank]->api.is_polling_active) {
                 continue;
             }
             one_rank_running |= polling_thread_rank(ranks[each_rank]);
@@ -250,21 +258,30 @@ dpu_check_fault_rank(struct dpu_rank_t *rank, dpu_bitfield_t *dpu_in_fault, dpu_
 }
 
 dpu_error_t
-dpu_sync_rank(struct dpu_rank_t *rank)
+dpu_sync_rank(struct dpu_rank_t *rank, dpu_bitfield_t *dpu_in_fault)
 {
     LOG_RANK(VERBOSE, rank, "");
 
     dpu_error_t status = DPU_OK;
     dpu_run_context_t run_context = dpu_get_run_context(rank);
-    dpu_bitfield_t dpu_in_fault[DPU_MAX_NR_CIS] = { 0 };
-    while (run_context->nb_dpu_running != 0 && (status == DPU_OK || status == DPU_ERR_DPU_FAULT)) {
-        pthread_cond_wait(&rank->api.poll_cond, &rank->mutex);
-        status = dpu_check_fault_rank(rank, dpu_in_fault, status);
-    }
+    dpu_description_t description = dpu_get_description(rank);
+    uint8_t nr_cis = description->hw.topology.nr_of_control_interfaces;
+
     status = dpu_check_fault_rank(rank, dpu_in_fault, status);
 
-    if (status == DPU_OK) {
-        status = dpu_custom_for_rank(rank, DPU_COMMAND_ALL_POSTEXECUTION, NULL);
+    if (run_context->nb_dpu_running == 0) {
+
+        status = dpu_check_fault_rank(rank, dpu_in_fault, status);
+        dpu_bitfield_t fault = dpu_mask_empty();
+        for (dpu_slice_id_t each_ci = 0; each_ci < nr_cis; ++each_ci) {
+            rank->api.dpu_launched[each_ci] = 0;
+            fault |= dpu_in_fault[each_ci];
+        }
+        rank->api.rank_running_state = DPU_RANK_IDLE;
+
+        if (fault == 0) {
+            status = dpu_custom_for_rank(rank, DPU_COMMAND_ALL_POSTEXECUTION, NULL);
+        }
     }
 
     return status;
@@ -275,22 +292,26 @@ dpu_sync_dpu(struct dpu_t *dpu)
 {
     LOG_DPU(VERBOSE, dpu, "");
 
-    dpu_error_t status;
+    dpu_error_t status = DPU_OK;
     struct dpu_rank_t *rank = dpu_get_rank(dpu);
     dpu_run_context_t run_context = dpu_get_run_context(rank);
     dpu_slice_id_t slice_id = dpu_get_slice_id(dpu);
     dpu_member_id_t member_id = dpu_get_member_id(dpu);
 
-    while (dpu_mask_is_selected(run_context->dpu_running[slice_id], member_id)) {
-        pthread_cond_wait(&rank->api.poll_cond, &rank->mutex);
-    }
     if (dpu_mask_is_selected(run_context->dpu_in_fault[slice_id], member_id)) {
         status = DPU_ERR_DPU_FAULT;
         dpu_print_lldb_message_on_fault(dpu, slice_id, member_id);
         goto exit;
     }
 
-    status = dpu_custom_for_dpu(dpu, DPU_COMMAND_DPU_POSTEXECUTION, NULL);
+    if (!dpu_mask_is_selected(run_context->dpu_running[slice_id], member_id)) {
+
+        status = dpu_custom_for_dpu(dpu, DPU_COMMAND_DPU_POSTEXECUTION, NULL);
+
+        for (uint8_t i = 0; i < DPU_MAX_NR_CIS; ++i)
+            rank->api.dpu_launched[i] = 0;
+        rank->api.rank_running_state = DPU_RANK_IDLE;
+    }
 
 exit:
     return status;
@@ -303,6 +324,7 @@ dpu_sync_set_sync_job(struct dpu_thread_job_sync *sync, struct dpu_thread_job *j
     job->sync = sync;
 }
 
+// TODO create a dpu_sync_parallel to sync parallel jobs ?
 __API_SYMBOL__ dpu_error_t
 dpu_sync(struct dpu_set_t dpu_set)
 {
@@ -340,6 +362,8 @@ dpu_sync(struct dpu_set_t dpu_set)
         case DPU_SET_DPU: {
             dpu_sync_set_sync_job(&sync_job, jobs[0]);
         } break;
+        default:
+            return DPU_ERR_INTERNAL;
     }
 
     return dpu_thread_job_do_jobs(ranks, nr_ranks, nr_jobs_per_rank, jobs, true, &sync_job);

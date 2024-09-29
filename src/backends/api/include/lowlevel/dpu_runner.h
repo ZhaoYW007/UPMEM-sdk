@@ -6,11 +6,14 @@
 #ifndef DPU_RUNNER_H
 #define DPU_RUNNER_H
 
-#include <pthread.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #include <dpu_error.h>
 #include <dpu_types.h>
+
+struct dpu_rank_t;
+struct dpu_t;
 
 /**
  * @file dpu_runner.h
@@ -19,7 +22,7 @@
 
 /**
  * @brief Launch a thread on all DPUs of a rank.
- * @param rank the the rank of DPUs
+ * @param rank the rank of DPUs
  * @param thread the thread to launch
  * @param should_resume whether the thread PC should be kept intact or set to 0
  * @return Whether the operation was successful.

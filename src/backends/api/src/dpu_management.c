@@ -5,17 +5,17 @@
 
 #define _GNU_SOURCE
 #include <inttypes.h>
+#include <pthread.h>
 
-#include <dpu_attributes.h>
-#include <dpu_program.h>
-#include <dpu_types.h>
-#include <dpu_management.h>
-
-#include <dpu_rank.h>
-#include <dpu_profile.h>
 #include <dpu_api_log.h>
-#include <dpu_properties_loader.h>
+#include <dpu_attributes.h>
 #include <dpu_internals.h>
+#include <dpu_management.h>
+#include <dpu_profile.h>
+#include <dpu_program.h>
+#include <dpu_properties_loader.h>
+#include <dpu_rank.h>
+#include <dpu_types.h>
 
 /* High-level API default value for threads/asynchronism management */
 #define NR_JOBS_PER_RANK_DEFAULT (16)
@@ -148,7 +148,7 @@ determine_backend_type_from_complete_profile(dpu_properties_t properties, dpu_ty
 }
 
 __API_SYMBOL__ dpu_error_t
-dpu_get_profile_description(const char *profile, dpu_description_t *description, dpu_rank_id_t rank_id)
+dpu_get_profile_description(const char *profile, dpu_description_t *description)
 {
     dpu_description_t dpu_description;
     dpu_error_t status;
@@ -161,8 +161,6 @@ dpu_get_profile_description(const char *profile, dpu_description_t *description,
     }
 
     *dpu_description = (struct _dpu_description_t) { 0 };
-
-    dpu_description->rank_handler_allocator_id = rank_id;
 
     properties = dpu_properties_load_from_profile(profile);
     if (properties == DPU_PROPERTIES_INVALID) {

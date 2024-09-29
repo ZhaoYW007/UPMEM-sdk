@@ -240,7 +240,7 @@ validate_chip_version(struct dpu_rank_t *rank, char *chip_version_elf)
             return DPU_ERR_INTERNAL;
     }
 
-    const bool simulator = (chip_id & 0xfU) == 0x4U;
+    const bool simulator = (chip_id & 0xfU) == 0x2U;
     const char *platform = simulator ? "simulator" : "hardware";
 
     if (strncmp(chip_version_elf, chip_version_hw, strlen(chip_version_hw)) != 0) {

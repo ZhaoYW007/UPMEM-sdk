@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <dpu_error.h>
 #include <verbose_control.h>
@@ -22,6 +23,7 @@
 #include <dpu_internals.h>
 #include <dpu_api_log.h>
 #include <dpu_mask.h>
+#include <dpu_fifo.h>
 
 static dpu_error_t
 copy_from_mrams_using_dpu_program(struct dpu_rank_t *rank, const struct dpu_transfer_matrix *transfer_matrix);
@@ -217,6 +219,212 @@ dpu_copy_from_wram_for_matrix(struct dpu_rank_t *rank, struct dpu_transfer_matri
     dpu_error_t status = RANK_FEATURE(rank, copy_from_wrams_matrix)(rank, transfer_matrix);
     dpu_unlock_rank(rank);
 
+    return status;
+}
+
+static bool
+broadcast_possible(struct dpu_rank_t *rank, struct dpu_fifo_rank_t *fifo, uint8_t *wr_address)
+{
+
+    bool first = true;
+    uint8_t nr_of_dpus_per_ci = rank->description->hw.topology.nr_of_dpus_per_control_interface;
+    uint8_t nr_of_cis = rank->description->hw.topology.nr_of_control_interfaces;
+    for (dpu_slice_id_t each_ci = 0; each_ci < nr_of_cis; ++each_ci) {
+        for (dpu_member_id_t each_dpu = 0; each_dpu < nr_of_dpus_per_ci; ++each_dpu) {
+            struct dpu_t *dpu = DPU_GET_UNSAFE(rank, each_ci, each_dpu);
+
+            if (!dpu || !dpu->enabled)
+                continue;
+
+            // check if the fifo is not full and the FIFOs write addresses the same
+            if (is_fifo_full(fifo, dpu)) {
+                return false;
+            } else if (first) {
+                first = false;
+                *wr_address = get_fifo_wr_ptr(fifo, dpu);
+            } else if (*wr_address != get_fifo_wr_ptr(fifo, dpu)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+static struct dpu_t *
+get_first_enabled_dpu(struct dpu_rank_t *rank)
+{
+
+    uint8_t nr_of_dpus_per_ci = rank->description->hw.topology.nr_of_dpus_per_control_interface;
+    uint8_t nr_of_cis = rank->description->hw.topology.nr_of_control_interfaces;
+
+    struct dpu_t *dpu = NULL;
+    for (dpu_slice_id_t each_ci = 0; each_ci < nr_of_cis; ++each_ci) {
+        for (dpu_member_id_t each_dpu = 0; each_dpu < nr_of_dpus_per_ci; ++each_dpu) {
+            dpu = DPU_GET_UNSAFE(rank, each_ci, each_dpu);
+            if (!dpu || !dpu->enabled)
+                continue;
+            else {
+                return dpu;
+            }
+        }
+    }
+    return NULL;
+}
+
+// increment the write pointer for all DPUs in the rank
+// this assumes that all DPUs have the same write pointer
+static dpu_error_t
+increment_fifo_wr_pointer(struct dpu_rank_t *rank, struct dpu_fifo_rank_t *fifo)
+{
+
+    // update the input fifo pointers write pointers
+    // just take the pointer of dpu 0, they should all be the same
+
+    struct dpu_t *dpu = get_first_enabled_dpu(rank);
+    if (!dpu)
+        return DPU_ERR_INTERNAL;
+    uint64_t wr_ptr = get_fifo_abs_wr_ptr(fifo, dpu);
+    ++wr_ptr;
+    // +2 because the DPU structure contains first read pointer then write pointer
+    return dpu_copy_to_wram_for_rank(rank, fifo->fifo_pointers_matrix.offset + 2, (void *)&wr_ptr, 2);
+}
+
+static dpu_error_t
+send_data_one_dpu(struct dpu_t *dpu, struct dpu_fifo_rank_t *fifo, void *data)
+{
+
+    dpu_error_t status = DPU_OK;
+    uint8_t input_fifo_wr_ptr = get_fifo_wr_ptr(fifo, dpu);
+    status = (dpu_copy_to_wram_for_dpu(
+        dpu, fifo->dpu_fifo_address + input_fifo_wr_ptr * fifo->dpu_fifo_data_size / 4, data, fifo->dpu_fifo_data_size / 4));
+
+    return status;
+}
+
+static dpu_error_t
+increment_fifo_wr_pointer_one_dpu(struct dpu_t *dpu, struct dpu_fifo_rank_t *fifo)
+{
+
+    uint64_t wr_ptr = get_fifo_abs_wr_ptr(fifo, dpu);
+    wr_ptr++;
+    return dpu_copy_to_wram_for_dpu(dpu, fifo->fifo_pointers_matrix.offset + 2, (void *)&wr_ptr, 2);
+}
+
+__PERF_PROFILING_SYMBOL__ __API_SYMBOL__ dpu_error_t
+dpu_copy_to_wram_fifo(struct dpu_rank_t *rank, struct dpu_fifo_rank_t *fifo, struct dpu_transfer_matrix *transfer_matrix)
+{
+
+    bool loop = false;
+    dpu_error_t status = DPU_OK;
+
+    dpu_bitfield_t dpu_xfer_done_mask[DPU_MAX_NR_CIS] = { 0 };
+    bool retry = false;
+    uint64_t n_retries = 0;
+    do {
+        // will loop if one of the input FIFO is full and retry until the push is successful
+        // allowing a maximum number of retries after which a DPU_ERR_WRAM_FIFO_FULL error is returned.
+        loop = false;
+
+        // first retrieve the value of FIFO pointers from DPUs
+        FF(dpu_copy_from_wram_for_matrix(rank, &(fifo->fifo_pointers_matrix)));
+
+        // when data is sent at the same pace to all DPUs, the input FIFO write pointer for all of them
+        // is the same, unless one of the DPU has its FIFO full and cannot take data anymore.
+        // Hence for this case, the broadcast transfer is possible
+        uint8_t wr_address = 0;
+        // TODO support broadcast on retry ?
+        if (!retry && broadcast_possible(rank, fifo, &wr_address)) {
+
+            // transfer at the same address (divided by 4 to get address in words)
+            transfer_matrix->offset = fifo->dpu_fifo_address + wr_address * fifo->dpu_fifo_data_size / 4;
+            transfer_matrix->size = fifo->dpu_fifo_data_size >> 2;
+            FF(dpu_copy_to_wram_for_matrix(rank, transfer_matrix));
+
+            FF(increment_fifo_wr_pointer(rank, fifo));
+        } else {
+
+            uint8_t nr_of_dpus_per_ci = rank->description->hw.topology.nr_of_dpus_per_control_interface;
+            uint8_t nr_of_cis = rank->description->hw.topology.nr_of_control_interfaces;
+            for (dpu_slice_id_t each_ci = 0; each_ci < nr_of_cis; ++each_ci) {
+                for (dpu_member_id_t each_dpu = 0; each_dpu < nr_of_dpus_per_ci; ++each_dpu) {
+                    struct dpu_t *dpu = DPU_GET_UNSAFE(rank, each_ci, each_dpu);
+
+                    if (!dpu || !dpu->enabled)
+                        continue;
+
+                    void *data = dpu_transfer_matrix_get_ptr(dpu, transfer_matrix);
+
+                    // check if the fifo is not full and if there is remaining data to be sent
+                    if (!dpu_mask_is_selected(dpu_xfer_done_mask[each_ci], each_dpu) && data) {
+                        if (!is_fifo_full(fifo, dpu)) {
+
+                            // send data
+                            send_data_one_dpu(dpu, fifo, data);
+
+                            // update the input fifo write pointer
+                            FF(increment_fifo_wr_pointer_one_dpu(dpu, fifo));
+
+                            dpu_xfer_done_mask[each_ci] = dpu_mask_select(dpu_xfer_done_mask[each_ci], each_dpu);
+                        } else {
+                            loop = true;
+                            retry = true;
+                        }
+                    }
+                }
+            }
+            if (retry) {
+                n_retries++;
+                usleep(fifo->time_for_retry);
+                // stop retries after a threshold
+                if (n_retries > fifo->max_retries) {
+                    loop = false;
+                    status = DPU_ERR_WRAM_FIFO_FULL;
+                }
+            }
+        }
+    } while (loop);
+
+end:
+    return status;
+}
+
+__PERF_PROFILING_SYMBOL__ __API_SYMBOL__ dpu_error_t
+dpu_copy_from_wram_fifo(struct dpu_rank_t *rank, struct dpu_fifo_rank_t *fifo, struct dpu_transfer_matrix *transfer_matrix)
+{
+    dpu_error_t status = DPU_OK;
+
+    // retrieve the value of FIFO pointers from DPUs
+    FF(dpu_copy_from_wram_for_matrix(rank, &(fifo->fifo_pointers_matrix)));
+
+    // copy the content of DPU output FIFO to the local buffer
+    // TODO we could optimize here to transfer only the max size of the FIFOs.
+    // Also need to determine how the user knows which elements are valid and not from the FIFO
+    // With the size of the transfer, we will transfer garbage in the invalid elements
+    // if(broadcast_possible)
+    transfer_matrix->offset = fifo->dpu_fifo_address;
+    // TODO cleanup and check if optimization possible when no wrap-around
+    uint16_t sz = get_fifo_max_size(rank, fifo);
+    if (sz) {
+        // this does not work because the fifo is a circular buffer
+        // but at least we avoid transfering if the size is zero
+        transfer_matrix->size = (fifo->dpu_fifo_data_size << fifo->dpu_fifo_ptr_size) >> 2;
+        FF(dpu_copy_from_wram_for_matrix(rank, transfer_matrix));
+    }
+
+    // We need to update the read pointer with the write pointer on the DPU
+    // But we dont want to update it on the host (to retrieve correct size of the FIFO)
+    // Hence after copying on the DPU we swap again the read and write to go back to
+    // original state
+    swap_fifo_rd_wr_ptr(fifo);
+
+    // Note: we should never erase the FIFO write pointer. For an output FIFO, this is owned by the DPU
+    // We only want to write the read pointer, so decrease the matrix size to 2 word for this transfer
+    fifo->fifo_pointers_matrix.size = 2;
+    status = dpu_copy_to_wram_for_matrix(rank, &(fifo->fifo_pointers_matrix));
+    swap_fifo_rd_wr_ptr(fifo);
+    fifo->fifo_pointers_matrix.size = 4;
+
+end:
     return status;
 }
 

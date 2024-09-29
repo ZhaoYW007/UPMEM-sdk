@@ -6,8 +6,9 @@
 #ifndef DPU_ELF_H
 #define DPU_ELF_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+
 #include <dpu_error.h>
 
 /**

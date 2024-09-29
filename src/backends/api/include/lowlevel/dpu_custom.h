@@ -7,7 +7,9 @@
 #define DPU_CUSTOM_H
 
 #include <dpu_error.h>
-#include <dpu_types.h>
+
+struct dpu_rank_t;
+struct dpu_t;
 
 /**
  * @file dpu_custom.h

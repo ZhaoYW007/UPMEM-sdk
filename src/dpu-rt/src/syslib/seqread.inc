@@ -50,7 +50,43 @@ __SEQREAD_INIT(seqreader_buffer_t cache, __mram_ptr void *mram_addr, seqreader_t
 void *
 __SEQREAD_GET(void *ptr, uint32_t inc, seqreader_t *reader)
 {
-    return (void *)__builtin_dpu_seqread_get((uintptr_t)ptr, inc, reader, PAGE_SIZE);
+#define FormatDMASize(size) (((size) >> 3) - 1)
+    uint32_t mram_cache;
+    uint32_t wram_cache;
+
+    /* clang-format off */
+    __asm__ volatile goto(
+    "add %[p], %[p], %[i], nc" __STR(PAGE_SIZE_LOG2) ", %l[end]\n\t"
+
+    "lw %[mram_cache], %[reader], 4\n\t"
+    "add %[mram_cache], %[mram_cache], " __STR(PAGE_SIZE) "\n\t"
+    "sw %[reader], 4, %[mram_cache]\n\t"
+
+    "lw %[wram_cache], %[reader], 0\n\t"
+    "ldma %[wram_cache], %[mram_cache], %[size]\n\t"
+
+    "add %[p], %[p], -" __STR(PAGE_SIZE) "\n\t"
+                          : /* [p] "+r"(ptr), */ [mram_cache]"=&r"(mram_cache), [wram_cache]"=&r"(wram_cache)
+                          : [p] "r"(ptr), [reader]"r"(reader), [i]"r"(inc),
+                            [size]"i"(FormatDMASize(PAGE_SIZE * 2))
+                          : "memory"
+                          : end);
+      /* clang-format on */
+
+// Note: the builtin cause correctness issue in the compiler
+//       by correcting it, we get performance issue
+//       so we revert to a situation without a specific builtin,
+//       but with optimized inline assembly.
+//       original work was in:
+//         c46c81684897a20b3acb5b6307d349862e4a56fd
+//         ab390d91d318d5b8633189c7c4e77b2f25889559
+// Note: having the variable "p" as input read only is a trick to force
+//       the usage of the r0 function parameter
+//       we seem to have an issue in register allocation ...
+// Note: we would like to allow to reuse r1, and r2 when done with them
+//       but safety first so we early clobber mram_cache and wram_cache
+end:
+    return ptr;
 }
 
 void *

@@ -6,6 +6,7 @@
 #ifndef DPU_RANK_H
 #define DPU_RANK_H
 
+#include "dpu_fifo.h"
 #include <dpu_description.h>
 #include <dpu_types.h>
 #include <dpu_runner.h>
@@ -97,19 +98,26 @@ struct dpu_runtime_state_t {
 };
 
 enum dpu_thread_job_type {
+    DPU_THREAD_JOB_INVALID,
     DPU_THREAD_JOB_LAUNCH_RANK,
     DPU_THREAD_JOB_LAUNCH_DPU,
     DPU_THREAD_JOB_SYNC,
+    DPU_THREAD_JOB_SYNC_PARALLEL,
     DPU_THREAD_JOB_COPY_WRAM_TO_MATRIX,
+    DPU_THREAD_JOB_PARALLEL_COPY_WRAM_TO_MATRIX,
+    DPU_THREAD_JOB_PARALLEL_FIFO_PUSH,
     DPU_THREAD_JOB_COPY_IRAM_TO_MATRIX,
     DPU_THREAD_JOB_COPY_MRAM_TO_MATRIX,
     DPU_THREAD_JOB_COPY_WRAM_FROM_MATRIX,
+    DPU_THREAD_JOB_PARALLEL_COPY_WRAM_FROM_MATRIX,
+    DPU_THREAD_JOB_PARALLEL_FIFO_FLUSH,
     DPU_THREAD_JOB_COPY_IRAM_FROM_MATRIX,
     DPU_THREAD_JOB_COPY_MRAM_FROM_MATRIX,
     DPU_THREAD_JOB_COPY_WRAM_TO_RANK,
     DPU_THREAD_JOB_COPY_IRAM_TO_RANK,
     DPU_THREAD_JOB_COPY_MRAM_TO_RANK,
     DPU_THREAD_JOB_CALLBACK,
+    DPU_THREAD_JOB_CALLBACK_PARALLEL,
     DPU_THREAD_JOB_LOAD,
 };
 
@@ -149,6 +157,12 @@ struct dpu_thread_job {
             struct dpu_program_t *runtime;
             dpu_elf_file_t elf_info;
         } load_info;
+
+        struct {
+            struct dpu_fifo_rank_t *fifo;
+            struct dpu_t *fifo_dpu;
+            struct dpu_transfer_matrix fifo_transfer_matrix;
+        };
     };
     STAILQ_ENTRY(dpu_thread_job) next_job;
     STAILQ_ENTRY(dpu_thread_job) next_rank;
@@ -160,6 +174,8 @@ struct dpu_thread_job_info {
 };
 
 #define DPU_ADDRESSES_FREQ_UNSET (UINT_MAX)
+
+enum dpu_rank_running_state_type { DPU_RANK_IDLE, DPU_RANK_RUN_DPU, DPU_RANK_RUN_RANK, DPU_RANK_RUN_GROUPS };
 
 struct dpu_rank_t {
     dpu_type_t type;
@@ -194,10 +210,17 @@ struct dpu_rank_t {
         struct dpu_thread_job *jobs_table;
         struct dpu_thread_job_list available_jobs;
         struct dpu_thread_job_list jobs;
+        uint32_t jobs_list_length;
         uint32_t available_jobs_length;
         pthread_mutex_t jobs_mutex;
         pthread_cond_t available_jobs_cond;
+        enum dpu_rank_running_state_type rank_running_state;
+        dpu_bitfield_t dpu_launched[DPU_MAX_NR_CIS];
+        bool is_polling_active;
+        bool jobs_thread;
+        uint32_t last_jobs_list_length;
         dpu_error_t job_error;
+        uint32_t rank_sw_id;
     } api;
 
     struct _dpu_rank_handler_context_t *handler_context;
@@ -231,6 +254,9 @@ struct dpu_t {
 
     /* Used by high-level API and DPU logging feature */
     struct dpu_program_t *program;
+
+    bool bank_interface_pmc_configured;
+    bool bank_interface_pmc_configuration_is_32bit_mode;
 };
 
 static inline uint8_t

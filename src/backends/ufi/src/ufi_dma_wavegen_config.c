@@ -22,6 +22,7 @@ __API_SYMBOL__ const struct dpu_dma_config dma_engine_cas_config = {
 	.xdma_time_start_activate = 9,
 	.xdma_time_start_access = 18,
 	.sdma_time_start_wb_f1 = 0,
+	.gated_clock_mode = 0,
 };
 
 /* Configuration for DPU_CLOCK_DIV2 */
@@ -30,7 +31,7 @@ __API_SYMBOL__ const struct dpu_dma_config dma_engine_clock_div2_config = {
 	.column_read_latency = 9,      .minimal_access_number = 0,
 	.default_time_origin = -4,     .ldma_to_sdma_time_origin = -10,
 	.xdma_time_start_activate = 9, .xdma_time_start_access = 18,
-	.sdma_time_start_wb_f1 = 0,
+	.sdma_time_start_wb_f1 = 0,    .gated_clock_mode = 0x07,
 };
 
 __API_SYMBOL__ const struct dpu_wavegen_config waveform_generator_clock_div2_config = {
@@ -57,7 +58,7 @@ __API_SYMBOL__ const struct dpu_dma_config dma_engine_clock_div3_config = {
 	.column_read_latency = 8,      .minimal_access_number = 0,
 	.default_time_origin = -4,     .ldma_to_sdma_time_origin = -10,
 	.xdma_time_start_activate = 9, .xdma_time_start_access = 18,
-	.sdma_time_start_wb_f1 = 0,
+	.sdma_time_start_wb_f1 = 0,    .gated_clock_mode = 0x07,
 };
 
 __API_SYMBOL__ const struct dpu_wavegen_config waveform_generator_clock_div3_config = {
@@ -84,7 +85,7 @@ __API_SYMBOL__ const struct dpu_dma_config dma_engine_clock_div4_config = {
 	.column_read_latency = 7,      .minimal_access_number = 0,
 	.default_time_origin = -4,     .ldma_to_sdma_time_origin = -10,
 	.xdma_time_start_activate = 9, .xdma_time_start_access = 18,
-	.sdma_time_start_wb_f1 = 0,
+	.sdma_time_start_wb_f1 = 0,    .gated_clock_mode = 0x07,
 };
 
 __API_SYMBOL__ const struct dpu_wavegen_config waveform_generator_clock_div4_config = {
@@ -418,12 +419,14 @@ __API_SYMBOL__ u32 dpu_dma_config(struct dpu_rank_t *rank,
 		VERBOSE, rank,
 		"DMA engine config: refresh_access_number: %d column_read_latency: %d minimal_access_number: %d "
 		"default_time_origin: %d ldma_to_sdma_time_origin: %d xdma_time_start_activate: %d "
-		"xdma_time_start_access: %d sdma_time_start_wb_f1: %d",
+		"xdma_time_start_access: %d sdma_time_start_wb_f1: %d "
+		"gated_clock_mode: %d",
 		config->refresh_access_number, config->column_read_latency,
 		config->minimal_access_number, config->default_time_origin,
 		config->ldma_to_sdma_time_origin,
 		config->xdma_time_start_activate,
-		config->xdma_time_start_access, config->sdma_time_start_wb_f1);
+		config->xdma_time_start_access, config->sdma_time_start_wb_f1,
+		config->gated_clock_mode);
 
 	dma_engine_timing |= (((u64)config->refresh_access_number) & 0x7Ful)
 			     << 36u;
@@ -458,6 +461,10 @@ __API_SYMBOL__ u32 dpu_dma_config(struct dpu_rank_t *rank,
 			      (dma_engine_timing >> 32u) & 0xFFu));
 	FF(ufi_write_dma_ctrl(rank, mask, 0x25,
 			      (dma_engine_timing >> 40u) & 0xFFu));
+
+	// Configure Clock Gating - Applied for v1.4/void for v1.3
+	FF(ufi_write_dma_ctrl(rank, mask, 0x30,
+			      (config->gated_clock_mode) & 0xFFu));
 
 	// Clear DMA Engine Configuration Path and flush reg_replace_instr of readop2
 	FF(ufi_clear_dma_ctrl(rank, mask));

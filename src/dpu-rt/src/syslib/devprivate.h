@@ -12,9 +12,7 @@
  */
 
 /**
- * @def tell
  * @brief On a simulator, injects a tell instruction to print out developer debug info.
- * @nolink
  *
  * @warning This function will not work on a target different from simulator.
  *

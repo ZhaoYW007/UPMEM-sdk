@@ -6,12 +6,13 @@
 #ifndef DPU_POLLING_H
 #define DPU_POLLING_H
 
+#include "dpu_types.h"
 #include <dpu_error.h>
 #include <dpu_rank.h>
 #include <stdint.h>
 
 dpu_error_t
-dpu_sync_rank(struct dpu_rank_t *rank);
+dpu_sync_rank(struct dpu_rank_t *rank, dpu_bitfield_t *dpu_in_fault);
 
 dpu_error_t
 dpu_sync_dpu(struct dpu_t *dpu);

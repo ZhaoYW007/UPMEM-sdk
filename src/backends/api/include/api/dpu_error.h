@@ -43,6 +43,10 @@ typedef enum dpu_error_t {
     DPU_ERR_MRAM_BUSY,
     /** Error returned when trying to prepare a memory transfer on an already prepared dpu. */
     DPU_ERR_TRANSFER_ALREADY_SET,
+    /** Error returned when trying to execute a parallel memory transfer on MRAM/IRAM. */
+    DPU_ERR_INVALID_PARALLEL_MEMORY_TRANSFER,
+    /** Error returned when trying to push on a WRAM FIFO which is full. */
+    DPU_ERR_WRAM_FIFO_FULL,
     /** Error returned when no program has been loaded into the dpu. */
     DPU_ERR_NO_PROGRAM_LOADED,
     /** Error returned when fetching a DPU symbol on DPUs with different programs */

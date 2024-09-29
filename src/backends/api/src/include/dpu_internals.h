@@ -19,6 +19,7 @@
 #define FF(s)                                                                                                                    \
     do {                                                                                                                         \
         if ((status = (s)) != DPU_OK) {                                                                                          \
+            printf("File %s Func %s Line %u\n", __FILE__, __func__, __LINE__);                                                   \
             goto end;                                                                                                            \
         }                                                                                                                        \
     } while (0)

@@ -6,7 +6,6 @@
 #ifndef DPU_VPD_H
 #define DPU_VPD_H
 
-#include <stdio.h>
 #include <stdint.h>
 
 #include <dpu_vpd_structures.h>

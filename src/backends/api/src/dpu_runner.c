@@ -105,6 +105,7 @@ dpu_launch_thread_on_rank(struct dpu_rank_t *rank, dpu_thread_t thread, bool sho
         dpu_selected_mask_t mask_all = rank->runtime.control_interface.slice_info[each_slice].enabled_dpus;
 
         rank->runtime.run_context.dpu_running[each_slice] = mask_all;
+        rank->api.dpu_launched[each_slice] = mask_all;
         nb_dpu_running += dpu_mask_count(mask_all);
     }
     rank->runtime.run_context.nb_dpu_running = nb_dpu_running;
@@ -165,6 +166,7 @@ dpu_launch_thread_on_dpu(struct dpu_t *dpu, dpu_thread_t thread, bool should_res
 
     if (!dpu_is_running) {
         rank->runtime.run_context.dpu_running[slice_id] |= mask_one;
+        rank->api.dpu_launched[slice_id] |= mask_one;
         rank->runtime.run_context.nb_dpu_running++;
     }
 

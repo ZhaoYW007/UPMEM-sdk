@@ -25,7 +25,6 @@
 #include <sysdef.h>
 
 /**
- * @fn handshake_notify
  * @brief Notifies a tasklet waiting for the notifier.
  *
  * The invoking tasklet is suspended until another tasklet calls handshake_wait_for(notifier).
@@ -35,7 +34,6 @@ void
 handshake_notify(void);
 
 /**
- * @fn handshake_wait_for
  * @brief Waits for the notifier tasklet
  *
  * The invoking tasklet is suspended until the notifier tasklet (indicated in the parameter) sends a

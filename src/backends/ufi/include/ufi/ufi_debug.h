@@ -29,3 +29,12 @@ dpu_error_t ci_debug_save_context_rank(struct dpu_rank_t *rank);
 dpu_error_t ci_debug_restore_mux_context_rank(struct dpu_rank_t *rank);
 
 dpu_error_t ci_debug_restore_context_rank(struct dpu_rank_t *rank);
+
+typedef struct {
+	dpu_error_t status;
+	dpuinstruction_t instr;
+} setup_for_onboot_return;
+
+setup_for_onboot_return setup_for_onboot(struct dpu_t *dpu);
+
+dpu_error_t host_synchronize(struct dpu_rank_t *rank);

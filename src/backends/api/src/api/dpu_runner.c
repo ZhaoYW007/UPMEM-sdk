@@ -51,6 +51,8 @@ dpu_launch(struct dpu_set_t dpu_set, dpu_launch_policy_t policy)
             rank = dpu_get_rank(dpu_set.dpu);
             ranks = &rank;
             break;
+        default:
+            return DPU_ERR_INTERNAL;
     }
 
     struct dpu_thread_job_sync sync;

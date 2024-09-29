@@ -22,6 +22,7 @@ struct dpu_dma_config {
 	uint8_t xdma_time_start_activate;
 	uint8_t xdma_time_start_access;
 	uint8_t sdma_time_start_wb_f1;
+	uint8_t gated_clock_mode;
 };
 
 struct dpu_wavegen_reg_config {

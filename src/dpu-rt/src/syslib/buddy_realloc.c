@@ -15,12 +15,14 @@
 
 ATOMIC_BIT_EXTERN(__buddy_lock);
 
+/// @cond INTERNAL
 typedef struct _buddy_search_context_t {
     unsigned int target_level;
     unsigned int real_index;
     unsigned int highlight_target_bit;
     unsigned int highlight_buddy_bit;
 } * buddy_search_context_t;
+/// @endcond
 
 extern void *
 safe_buddy_alloc(size_t size);

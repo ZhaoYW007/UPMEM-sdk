@@ -1135,36 +1135,6 @@ end:
 	return status;
 }
 
-__API_SYMBOL__ dpu_error_t dpu_wavegen_read_status(struct dpu_t *dpu,
-						   uint8_t address,
-						   uint8_t *value)
-{
-	dpu_error_t status = DPU_OK;
-
-	struct dpu_rank_t *rank = dpu->rank;
-	uint8_t mask = CI_MASK_ONE(dpu->slice_id);
-	uint8_t results[DPU_MAX_NR_CIS];
-
-	LOG_DPU(DEBUG, dpu, "%d", address);
-
-	if (!dpu->enabled) {
-		return DPU_ERR_DPU_DISABLED;
-	}
-
-	dpu_lock_rank(rank);
-
-	FF(ufi_select_dpu(rank, &mask, dpu->dpu_id));
-	FF(ufi_write_dma_ctrl(rank, mask, 0xFF, address & 3));
-	FF(ufi_clear_dma_ctrl(rank, mask));
-	FF(ufi_read_dma_ctrl(rank, mask, results));
-
-	*value = results[dpu->slice_id];
-
-end:
-	dpu_unlock_rank(rank);
-	return status;
-}
-
 #define TIMEOUT_MUX_STATUS 100
 #define CMD_GET_MUX_CTRL 0x02
 static dpu_error_t dpu_check_wavegen_mux_status_for_dpu(struct dpu_rank_t *rank,

@@ -60,6 +60,9 @@ dpu_thread_job_do_jobs(struct dpu_rank_t **ranks,
 void
 dpu_thread_job_init_sync_job(struct dpu_thread_job_sync *sync, uint32_t nr_ranks);
 
+uint32_t
+dpu_thread_jobs_size(struct dpu_rank_t *rank);
+
 #define DPU_THREAD_JOB_GET_JOBS(ranks, nr_ranks, nr_jobs_per_rank, jobs, struct_sync, bool_sync, status)                         \
     if ((bool_sync) && (((nr_ranks) != 1) || !(ranks)[0]->api.callback_tid_set)) {                                               \
         dpu_thread_job_init_sync_job((struct_sync), (nr_ranks));                                                                 \
@@ -80,7 +83,7 @@ dpu_thread_job_init_sync_job(struct dpu_thread_job_sync *sync, uint32_t nr_ranks
         }                                                                                                                        \
     }
 
-#define DPU_THREAD_JOB_SET_JOBS(ranks, rank, nr_ranks, jobs, job, struct_sync, bool_sync, statement)                             \
+#define DPU_THREAD_JOB_SET_JOBS_(ranks, rank, nr_ranks, jobs, job, struct_sync, bool_sync, sync_type, statement)                 \
     do {                                                                                                                         \
         if ((bool_sync) && (((nr_ranks) != 1) || !(ranks)[0]->api.callback_tid_set)) {                                           \
             for (uint32_t _each_rank = 0, _job_id = 0; _each_rank < (nr_ranks); _each_rank++) {                                  \
@@ -88,7 +91,7 @@ dpu_thread_job_init_sync_job(struct dpu_thread_job_sync *sync, uint32_t nr_ranks
                 job = (jobs)[_job_id++];                                                                                         \
                 { statement };                                                                                                   \
                 job = (jobs)[_job_id++];                                                                                         \
-                job->type = DPU_THREAD_JOB_SYNC;                                                                                 \
+                job->type = sync_type;                                                                                           \
                 job->sync = (struct_sync);                                                                                       \
             }                                                                                                                    \
         } else {                                                                                                                 \
@@ -99,5 +102,19 @@ dpu_thread_job_init_sync_job(struct dpu_thread_job_sync *sync, uint32_t nr_ranks
             }                                                                                                                    \
         }                                                                                                                        \
     } while (0)
+
+#define DPU_THREAD_JOB_SET_JOBS(ranks, rank, nr_ranks, jobs, job, struct_sync, bool_sync, statement)                             \
+    DPU_THREAD_JOB_SET_JOBS_(ranks, rank, nr_ranks, jobs, job, struct_sync, bool_sync, DPU_THREAD_JOB_SYNC, statement)
+
+#define DPU_THREAD_JOB_SET_JOBS_PARALLEL(ranks, rank, nr_ranks, jobs, job, struct_sync, bool_sync, parallel, statement)          \
+    DPU_THREAD_JOB_SET_JOBS_(ranks,                                                                                              \
+        rank,                                                                                                                    \
+        nr_ranks,                                                                                                                \
+        jobs,                                                                                                                    \
+        job,                                                                                                                     \
+        struct_sync,                                                                                                             \
+        bool_sync,                                                                                                               \
+        parallel ? DPU_THREAD_JOB_SYNC_PARALLEL : DPU_THREAD_JOB_SYNC,                                                           \
+        statement)
 
 #endif /* DPU_THREAD_JOB_H */

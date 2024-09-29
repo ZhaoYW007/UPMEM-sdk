@@ -7,7 +7,7 @@
 #define __DPU_TARGET_MACROS_H
 
 #include <limits.h>
-#include <dpu_types.h>
+
 #include <dpu_target.h>
 
 /**
