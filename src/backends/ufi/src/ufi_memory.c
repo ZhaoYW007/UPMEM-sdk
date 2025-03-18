@@ -375,9 +375,8 @@ is_transfer_matrix_full(struct dpu_rank_t *rank,
 	return true;
 }
 
-/* This function assumes duplication was already done since it does not handle
- * cases where pairs of dpus have incompatible mux positions.
- * Do care about pairs of dpus. See issue #279.
+/* This function handles cases where pairs of dpus have incompatible mux
+ * positions. See issue #279.
  */
 static dpu_error_t host_get_access_for_transfer_matrix(
 	struct dpu_rank_t *rank,

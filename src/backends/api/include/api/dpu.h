@@ -147,7 +147,9 @@ typedef enum _dpu_callback_flags_t {
     do {                                                                                                                         \
         dpu_error_t __error = (statement);                                                                                       \
         if (__error != DPU_OK) {                                                                                                 \
-            fprintf(stderr, "%s:%d(%s): DPU Error (%s)\n", __FILE__, __LINE__, __func__, dpu_error_to_string(__error));          \
+            char *__error_string = dpu_error_to_string(__error);                                                                 \
+            fprintf(stderr, "%s:%d(%s): DPU Error (%s)\n", __FILE__, __LINE__, __func__, __error_string);                        \
+            free(__error_string);                                                                                                \
             on_error;                                                                                                            \
         }                                                                                                                        \
     } while (0)

@@ -105,7 +105,7 @@ struct dpu_region_address_translation {
     bool one_read;
 
     /* Pointer to private data for each backend implementation */
-    void *privateData;
+    void *private;
 
     /* Returns -errno on error, 0 otherwise. */
     int (*init_rank)(struct dpu_region_address_translation *tr, uint8_t channel_id);

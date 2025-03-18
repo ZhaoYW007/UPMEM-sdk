@@ -26,4 +26,15 @@
 #define LOG_DPU(lvl, dpu, fmt, ...)                                                                                              \
     LOG(lvl)(__vc(), "[" LOG_FMT_DPU "] %s: " fmt, dpu->rank->rank_id, dpu->slice_id, dpu->dpu_id, __func__, ##__VA_ARGS__)
 
+#if __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 32
+#define MT_SAFE_STRERROR(errno) strerror(errno)
+#else
+#define MT_SAFE_STRERROR(errno)                                                                                                  \
+    ({                                                                                                                           \
+        char buf[256];                                                                                                           \
+        char *err_msg = strerror_r(errno, buf, sizeof(buf));                                                                     \
+        err_msg;                                                                                                                 \
+    })
+#endif
+
 #endif // BACKENDS_DPU_LOG_UTILS_H

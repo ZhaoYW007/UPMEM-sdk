@@ -8,7 +8,6 @@
  */
 
 #include "ufi/ufi_ci_types.h"
-#include <stddef.h>
 #include <ufi_rank_utils.h>
 #include <dpu_hw_description.h>
 

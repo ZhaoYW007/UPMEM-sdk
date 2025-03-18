@@ -155,7 +155,7 @@ dpu_error_to_string_switch(dpu_error_t status)
     }
 }
 
-__API_SYMBOL__ const char *
+__API_SYMBOL__ char *
 dpu_error_to_string(dpu_error_t status)
 {
     char *string;

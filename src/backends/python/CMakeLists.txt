@@ -9,8 +9,8 @@ find_program(PYFORMAT autopep8)
 find_package(Python3 REQUIRED)
 file(RELATIVE_PATH PYTHON_RELATIVE_PATH "/usr" ${Python3_SITELIB})
 
-set(C_API_LIB libdpu.so)
-set(C_VPD_LIB libdpuvpd.so)
+set(C_API_LIB dpu)
+set(C_VPD_LIB dpuvpd)
 get_filename_component(BACKENDS_DIR ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
 set(C_API_DIR ${BACKENDS_DIR}/api/include/api)
 set(C_LLAPI_DIR  ${BACKENDS_DIR}/api/include/lowlevel)
@@ -30,7 +30,7 @@ set(C_VPD_HEADERS
     ${C_VPD_DIR}/dpu_flash_partition.h
     )
 
-set(PYFORMAT_ARGS --in-place --aggressive --aggressive)
+set(PYFORMAT_ARGS --in-place --aggressive --aggressive -j 0)
 
 add_custom_target(
         python-generate
@@ -44,6 +44,7 @@ add_custom_target(
             --no-undefs
             --header-template=${CMAKE_CURRENT_SOURCE_DIR}/utils/ffi_header.txt
             --insert-file=${CMAKE_CURRENT_SOURCE_DIR}/utils/ffi_footer.txt
+            --no-macro-warnings
         COMMAND sed -i "\"s/add_library_search_dirs\(\\[\\]\)/add_library_search_dirs([os.path.dirname(os.path.dirname(os.path.dirname((os.path.dirname(__file__)))))])/\"" ${CMAKE_CURRENT_SOURCE_DIR}/dpu/ffi.py
         COMMAND sed -i \"s/${BACKENDS_DIR_SED}/<backends>/\" ${CMAKE_CURRENT_SOURCE_DIR}/dpu/ffi.py
         COMMAND sed -i \"s/set\(\)/[]/\" ${CMAKE_CURRENT_SOURCE_DIR}/dpu/ffi.py
@@ -65,6 +66,7 @@ add_custom_target(
             --strip-build-path=${BACKENDS_DIR}
             --no-undefs
             --header-template=${CMAKE_CURRENT_SOURCE_DIR}/utils/ffi_header.txt
+            --no-macro-warnings
         COMMAND ${PYFORMAT}
             ${CMAKE_CURRENT_SOURCE_DIR}/dpu/vpd/vpd.py
             ${PYFORMAT_ARGS}

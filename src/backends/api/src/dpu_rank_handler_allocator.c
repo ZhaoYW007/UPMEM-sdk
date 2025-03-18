@@ -496,15 +496,9 @@ set_generic_description_for_enabled_dpus(struct dpu_rank_t *rank, dpu_descriptio
     for (uint8_t each_ci = 0; each_ci < description->hw.topology.nr_of_control_interfaces; ++each_ci) {
         dpu_selected_mask_t disabled_mask_for_ci = (dpu_selected_mask_t)((disabled_mask >> (8 * each_ci)) & 0xFFl);
 
-        // update enabled dpus from CI mask
-        if (!(CI_MASK_ON(description->hw.topology.ci_mask, each_ci))) {
-            rank->runtime.control_interface.slice_info[each_ci].all_dpus_are_enabled = false;
-            rank->runtime.control_interface.slice_info[each_ci].enabled_dpus = 0;
-        } else {
-            rank->runtime.control_interface.slice_info[each_ci].all_dpus_are_enabled = disabled_mask_for_ci == dpu_mask_empty();
-            rank->runtime.control_interface.slice_info[each_ci].enabled_dpus = dpu_mask_difference(
-                dpu_mask_all(description->hw.topology.nr_of_dpus_per_control_interface), disabled_mask_for_ci);
-        }
+        rank->runtime.control_interface.slice_info[each_ci].all_dpus_are_enabled = disabled_mask_for_ci == dpu_mask_empty();
+        rank->runtime.control_interface.slice_info[each_ci].enabled_dpus
+            = dpu_mask_difference(dpu_mask_all(description->hw.topology.nr_of_dpus_per_control_interface), disabled_mask_for_ci);
     }
 
     return true;

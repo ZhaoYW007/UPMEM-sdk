@@ -10,6 +10,7 @@
 #include <ufi/ufi_ci_types.h>
 #include <dpu_types.h>
 #include <ufi_rank_utils.h>
+#include <ufi/ufi_bit_config.h>
 
 #define NR_NIBBLES_PER_BYTE 2
 #define NR_BITS_PER_NIBBLE 4

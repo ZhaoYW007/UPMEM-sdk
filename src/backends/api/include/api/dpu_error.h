@@ -114,7 +114,7 @@ typedef enum dpu_error_t {
  * @return The string associated to the specified status. It is the user responsability to free the returned string when it is not
  * needed anymore.
  */
-const char *
+char *
 dpu_error_to_string(dpu_error_t status);
 
 /**

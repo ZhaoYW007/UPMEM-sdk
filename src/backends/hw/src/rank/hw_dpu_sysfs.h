@@ -12,19 +12,13 @@
 
 #define DPU_INVALID_RANK_INDEX 255
 
-struct dpu_rank_udev {
-    struct udev *udev;
-    struct udev_device *dev;
-    struct udev_enumerate *enumerate;
-    struct udev_list_entry *devices;
-};
-
 struct dpu_rank_fs {
     char rank_path[128];
     int fd_rank;
     int fd_dax;
 
-    struct dpu_rank_udev udev, udev_dax, udev_parent;
+    struct udev_device *udev;
+    struct udev_device *udev_dax;
 };
 
 uint8_t

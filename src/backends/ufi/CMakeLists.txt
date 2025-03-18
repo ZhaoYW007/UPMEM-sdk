@@ -78,8 +78,7 @@ endforeach ()
 
 add_custom_target(
         ufi-format
-        COMMAND ${CLANG_FORMAT_EXE}
-        -style=file
-        -i
-        ${ALL_SOURCE_FILES}
+        COMMAND echo ${ALL_SOURCE_FILES} |
+        ${XARGS_EXE} -n 1 -P ${N}
+        ${CLANG_FORMAT_EXE} -style=file -i
 )

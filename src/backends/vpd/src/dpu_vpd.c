@@ -41,6 +41,52 @@ __vc()
     })
 /* clang-format on */
 
+#define MAX_PATH_SIZE 100
+
+__API_SYMBOL__ enum dpu_vpd_error
+dpu_vpd_get_pull_vpd_path(const char *dev_rank_path, char *pull_vpd_path, size_t pull_vpd_path_max_size)
+{
+    LOG_FN(VERBOSE, "");
+    uint32_t rank_id;
+    if (!sscanf(dev_rank_path, "/dev/dpu_rank%u", &rank_id))
+        return DPU_VPD_ERR;
+
+    int len = snprintf(pull_vpd_path, pull_vpd_path_max_size, "/sys/class/dpu_rank/dpu_rank%u/pull_dimm_vpd", rank_id);
+    if (len < 0 || len >= (int)pull_vpd_path_max_size) {
+        return DPU_VPD_ERR;
+    }
+    return DPU_VPD_OK;
+}
+
+__API_SYMBOL__ enum dpu_vpd_error
+
+dpu_vpd_update_from_mcu(const char *dev_rank_path)
+{
+    LOG_FN(VERBOSE, "");
+    FILE *f;
+
+    char pull_vpd_path[MAX_PATH_SIZE];
+
+    if (dpu_vpd_get_pull_vpd_path(dev_rank_path, pull_vpd_path, MAX_PATH_SIZE) != DPU_VPD_OK) {
+        return DPU_VPD_ERR;
+    }
+    f = fopen(pull_vpd_path, "w");
+    if (f == NULL) {
+        LOG_FN(WARNING, "Error opening file: %s, are you root ?", pull_vpd_path);
+        return DPU_VPD_ERR;
+    }
+
+    if (fprintf(f, "1") < 0) {
+        LOG_FN(WARNING, "Error writing to sysfs node: %s", pull_vpd_path);
+        fclose(f);
+        return DPU_VPD_ERR;
+    }
+
+    fclose(f);
+
+    return DPU_VPD_OK;
+}
+
 __API_SYMBOL__ enum dpu_vpd_error
 dpu_vpd_get_vpd_path(const char *dev_rank_path, char *vpd_path)
 {

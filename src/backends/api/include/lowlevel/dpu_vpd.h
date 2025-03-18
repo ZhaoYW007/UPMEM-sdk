@@ -25,6 +25,16 @@ enum dpu_vpd_error
 dpu_vpd_get_vpd_path(const char *dev_rank_path, char *vpd_path);
 
 /**
+ * @brief Get pull_vpd file path from rank device path
+ * @param dev_rank_path Path to the rank device
+ * @param pull_vpd_path Pointer to an allocated char array to hold pull_vpd path
+ * @param pull_vpd_path_max_size Size of pull_vpd_path char array
+ * @return DPU_VPD_OK in case of success, otherwise the corresponding error code.
+ */
+enum dpu_vpd_error
+dpu_vpd_get_pull_vpd_path(const char *dev_rank_path, char *pull_vpd_path, size_t pull_vpd_path_max_size);
+
+/**
  * @brief Init vpd content from the vpd passed in argument: if NULL, the content
  * will be initialised to default values.
  * @param vpd_path Path to the vpd file
@@ -63,6 +73,14 @@ dpu_vpd_db_update(struct dpu_vpd_database *db, const char *key, const uint8_t *v
  */
 void
 dpu_vpd_db_destroy(struct dpu_vpd_database *db);
+
+/**
+ * @brief Update VPD of the rank from the MCU
+ * @param dev_rank_path Path to the rank device
+ * @return DPU_VPD_OK in case of success, otherwise the corresponding error code.
+ */
+enum dpu_vpd_error
+dpu_vpd_update_from_mcu(const char *dev_rank_path);
 
 /**
  * @brief Write vpd content to file

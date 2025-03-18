@@ -46,15 +46,14 @@ class DPUVpd():
         if dpu_vpd_get_vpd_path(self.rank_path,
                                 vpd_path) != DPU_VPD_OK:
             raise DPUVpdError(
-                "failed to get vpd path from {}".format(
-                    self.rank_path))
+                f"failed to get vpd path from {self.rank_path}")
 
         if dpu_vpd_init(vpd_path, self.vpd) != DPU_VPD_OK:
             raise DPUVpdError(
-                "failed to get vpd content from {}".format(vpd_path))
+                f"failed to get vpd content from {vpd_path}")
 
         rank_id = re.findall(r'\d+', self.rank_path)[0]
-        with open("{}{}/rank_index".format(SYSFS_PATH, rank_id), "r") as rank_index:
+        with open(f"{SYSFS_PATH}{rank_id}/rank_index", "r") as rank_index:
             self.rank_index = int(rank_index.read())
 
     def __enter__(self):
@@ -65,8 +64,12 @@ class DPUVpd():
             if dpu_vpd_commit_to_device(
                     self.vpd, self.rank_path) != DPU_VPD_OK:
                 raise DPUVpdError(
-                    "failed to commit vpd to {}".format(
-                        self.rank_path))
+                    f"failed to commit vpd to {self.rank_path}")
+            # When we commit VPD to mcu, we then write the node pull_dimm_vpd
+            # which will update the vpd held in the host side
+            if dpu_vpd_update_from_mcu(self.rank_path) != DPU_VPD_OK:
+                raise DPUVpdError(
+                    f"failed to commit vpd to {self.rank_path}")
 
     def __str__(self):
         ranks = ""

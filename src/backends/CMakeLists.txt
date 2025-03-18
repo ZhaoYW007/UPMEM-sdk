@@ -38,6 +38,8 @@ execute_process(
     )
 
 include(GNUInstallDirs)
+include(ProcessorCount)
+find_program(XARGS_EXE xargs)
 
 if (CODE_COVERAGE)
     if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -89,12 +91,13 @@ foreach (SOURCE_FILE ${ALL_SOURCE_FILES})
     endif ()
 endforeach ()
 
+ProcessorCount(N)
+
 add_custom_target(
         format
-        COMMAND ${CLANG_FORMAT_EXE}
-        -style=file
-        -i
-        ${ALL_SOURCE_FILES}
+        COMMAND echo ${ALL_SOURCE_FILES} |
+        ${XARGS_EXE} -n 1 -P ${N}
+        ${CLANG_FORMAT_EXE} -style=file -i
 )
 
 add_custom_target(autogen)

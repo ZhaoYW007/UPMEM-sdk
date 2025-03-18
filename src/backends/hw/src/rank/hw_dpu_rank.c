@@ -75,6 +75,8 @@ struct dpu_region_address_translation *backend_translate[] = {
     0, /* devicetree user backend not yet implemented */
 };
 
+static void
+update_runtime_enabled_dpus_with_ci_mask(struct dpu_rank_t *rank, dpu_description_t description);
 static dpu_rank_status_e
 hw_allocate(struct dpu_rank_t *rank, dpu_description_t description);
 static dpu_rank_status_e
@@ -415,6 +417,22 @@ get_byte_order(struct dpu_rank_t *rank, hw_dpu_rank_allocation_parameters_t para
     return DPU_RANK_SUCCESS;
 }
 
+#define DPUS_ALL_DISABLED 0
+#define CI_MASK_ON(mask, ci) (((mask) & (1u << (ci))) != 0)
+
+static void
+update_runtime_enabled_dpus_with_ci_mask(struct dpu_rank_t *rank, dpu_description_t description)
+{
+    for (uint8_t each_ci = 0; each_ci < description->hw.topology.nr_of_control_interfaces; ++each_ci) {
+
+        // update enabled dpus from CI mask
+        if (!(CI_MASK_ON(description->hw.topology.ci_mask, each_ci))) {
+            rank->runtime.control_interface.slice_info[each_ci].all_dpus_are_enabled = false;
+            rank->runtime.control_interface.slice_info[each_ci].enabled_dpus = DPUS_ALL_DISABLED;
+        }
+    }
+}
+
 static dpu_rank_status_e
 hw_allocate(struct dpu_rank_t *rank, dpu_description_t description)
 {
@@ -465,6 +483,9 @@ hw_allocate(struct dpu_rank_t *rank, dpu_description_t description)
 
     // retrieve ci_mask from sysfs
     description->hw.topology.ci_mask = dpu_sysfs_get_ci_mask(&params->rank_fs);
+
+    // update runtime enabled dpus with ci_mask
+    update_runtime_enabled_dpus_with_ci_mask(rank, description);
 
     if (params->dpu_chip_id != description->hw.signature.chip_id) {
         LOG_RANK(

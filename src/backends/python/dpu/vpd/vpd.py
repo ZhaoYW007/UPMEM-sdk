@@ -876,7 +876,7 @@ del loaderclass
 add_library_search_dirs([])
 
 # Begin libraries
-_libs["libdpuvpd.so"] = load_library("libdpuvpd.so")
+_libs["dpuvpd"] = load_library("dpuvpd")
 
 # 1 libraries
 # End libraries
@@ -1082,28 +1082,34 @@ DPU_VPD_ERR_OVERFLOW = (DPU_VPD_ERR_DPU_ALREADY_DISABLED + 1)
 DPU_VPD_ERR = (DPU_VPD_ERR_OVERFLOW + 1)
 
 # api/include/lowlevel/dpu_vpd.h: 25
-if _libs["libdpuvpd.so"].has("dpu_vpd_get_vpd_path", "cdecl"):
-    dpu_vpd_get_vpd_path = _libs["libdpuvpd.so"].get(
-        "dpu_vpd_get_vpd_path", "cdecl")
+if _libs["dpuvpd"].has("dpu_vpd_get_vpd_path", "cdecl"):
+    dpu_vpd_get_vpd_path = _libs["dpuvpd"].get("dpu_vpd_get_vpd_path", "cdecl")
     dpu_vpd_get_vpd_path.argtypes = [String, String]
     dpu_vpd_get_vpd_path.restype = enum_dpu_vpd_error
 
 # api/include/lowlevel/dpu_vpd.h: 35
-if _libs["libdpuvpd.so"].has("dpu_vpd_init", "cdecl"):
-    dpu_vpd_init = _libs["libdpuvpd.so"].get("dpu_vpd_init", "cdecl")
+if _libs["dpuvpd"].has("dpu_vpd_get_pull_vpd_path", "cdecl"):
+    dpu_vpd_get_pull_vpd_path = _libs["dpuvpd"].get(
+        "dpu_vpd_get_pull_vpd_path", "cdecl")
+    dpu_vpd_get_pull_vpd_path.argtypes = [String, String, c_size_t]
+    dpu_vpd_get_pull_vpd_path.restype = enum_dpu_vpd_error
+
+# api/include/lowlevel/dpu_vpd.h: 45
+if _libs["dpuvpd"].has("dpu_vpd_init", "cdecl"):
+    dpu_vpd_init = _libs["dpuvpd"].get("dpu_vpd_init", "cdecl")
     dpu_vpd_init.argtypes = [String, POINTER(struct_dpu_vpd)]
     dpu_vpd_init.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 46
-if _libs["libdpuvpd.so"].has("dpu_vpd_db_init", "cdecl"):
-    dpu_vpd_db_init = _libs["libdpuvpd.so"].get("dpu_vpd_db_init", "cdecl")
+# api/include/lowlevel/dpu_vpd.h: 56
+if _libs["dpuvpd"].has("dpu_vpd_db_init", "cdecl"):
+    dpu_vpd_db_init = _libs["dpuvpd"].get("dpu_vpd_db_init", "cdecl")
     dpu_vpd_db_init.argtypes = [
         c_int, String, POINTER(struct_dpu_vpd_database)]
     dpu_vpd_db_init.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 58
-if _libs["libdpuvpd.so"].has("dpu_vpd_db_update", "cdecl"):
-    dpu_vpd_db_update = _libs["libdpuvpd.so"].get("dpu_vpd_db_update", "cdecl")
+# api/include/lowlevel/dpu_vpd.h: 68
+if _libs["dpuvpd"].has("dpu_vpd_db_update", "cdecl"):
+    dpu_vpd_db_update = _libs["dpuvpd"].get("dpu_vpd_db_update", "cdecl")
     dpu_vpd_db_update.argtypes = [
         POINTER(struct_dpu_vpd_database),
         String,
@@ -1112,75 +1118,79 @@ if _libs["libdpuvpd.so"].has("dpu_vpd_db_update", "cdecl"):
         c_int]
     dpu_vpd_db_update.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 65
-if _libs["libdpuvpd.so"].has("dpu_vpd_db_destroy", "cdecl"):
-    dpu_vpd_db_destroy = _libs["libdpuvpd.so"].get(
-        "dpu_vpd_db_destroy", "cdecl")
+# api/include/lowlevel/dpu_vpd.h: 75
+if _libs["dpuvpd"].has("dpu_vpd_db_destroy", "cdecl"):
+    dpu_vpd_db_destroy = _libs["dpuvpd"].get("dpu_vpd_db_destroy", "cdecl")
     dpu_vpd_db_destroy.argtypes = [POINTER(struct_dpu_vpd_database)]
     dpu_vpd_db_destroy.restype = None
 
-# api/include/lowlevel/dpu_vpd.h: 74
-if _libs["libdpuvpd.so"].has("dpu_vpd_write", "cdecl"):
-    dpu_vpd_write = _libs["libdpuvpd.so"].get("dpu_vpd_write", "cdecl")
+# api/include/lowlevel/dpu_vpd.h: 83
+if _libs["dpuvpd"].has("dpu_vpd_update_from_mcu", "cdecl"):
+    dpu_vpd_update_from_mcu = _libs["dpuvpd"].get(
+        "dpu_vpd_update_from_mcu", "cdecl")
+    dpu_vpd_update_from_mcu.argtypes = [String]
+    dpu_vpd_update_from_mcu.restype = enum_dpu_vpd_error
+
+# api/include/lowlevel/dpu_vpd.h: 92
+if _libs["dpuvpd"].has("dpu_vpd_write", "cdecl"):
+    dpu_vpd_write = _libs["dpuvpd"].get("dpu_vpd_write", "cdecl")
     dpu_vpd_write.argtypes = [POINTER(struct_dpu_vpd), String]
     dpu_vpd_write.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 83
-if _libs["libdpuvpd.so"].has("dpu_vpd_db_write", "cdecl"):
-    dpu_vpd_db_write = _libs["libdpuvpd.so"].get("dpu_vpd_db_write", "cdecl")
+# api/include/lowlevel/dpu_vpd.h: 101
+if _libs["dpuvpd"].has("dpu_vpd_db_write", "cdecl"):
+    dpu_vpd_db_write = _libs["dpuvpd"].get("dpu_vpd_db_write", "cdecl")
     dpu_vpd_db_write.argtypes = [POINTER(struct_dpu_vpd_database), String]
     dpu_vpd_db_write.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 93
-if _libs["libdpuvpd.so"].has("dpu_vpd_commit_to_device", "cdecl"):
-    dpu_vpd_commit_to_device = _libs["libdpuvpd.so"].get(
+# api/include/lowlevel/dpu_vpd.h: 111
+if _libs["dpuvpd"].has("dpu_vpd_commit_to_device", "cdecl"):
+    dpu_vpd_commit_to_device = _libs["dpuvpd"].get(
         "dpu_vpd_commit_to_device", "cdecl")
     dpu_vpd_commit_to_device.argtypes = [POINTER(struct_dpu_vpd), String]
     dpu_vpd_commit_to_device.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 103
-if _libs["libdpuvpd.so"].has("dpu_vpd_db_commit_to_device", "cdecl"):
-    dpu_vpd_db_commit_to_device = _libs["libdpuvpd.so"].get(
+# api/include/lowlevel/dpu_vpd.h: 121
+if _libs["dpuvpd"].has("dpu_vpd_db_commit_to_device", "cdecl"):
+    dpu_vpd_db_commit_to_device = _libs["dpuvpd"].get(
         "dpu_vpd_db_commit_to_device", "cdecl")
     dpu_vpd_db_commit_to_device.argtypes = [
         POINTER(struct_dpu_vpd_database), String]
     dpu_vpd_db_commit_to_device.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 113
-if _libs["libdpuvpd.so"].has("dpu_vpd_commit_to_device_from_file", "cdecl"):
-    dpu_vpd_commit_to_device_from_file = _libs["libdpuvpd.so"].get(
+# api/include/lowlevel/dpu_vpd.h: 131
+if _libs["dpuvpd"].has("dpu_vpd_commit_to_device_from_file", "cdecl"):
+    dpu_vpd_commit_to_device_from_file = _libs["dpuvpd"].get(
         "dpu_vpd_commit_to_device_from_file", "cdecl")
     dpu_vpd_commit_to_device_from_file.argtypes = [String, String]
     dpu_vpd_commit_to_device_from_file.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 123
-if _libs["libdpuvpd.so"].has("dpu_vpd_db_commit_to_device_from_file", "cdecl"):
-    dpu_vpd_db_commit_to_device_from_file = _libs["libdpuvpd.so"].get(
+# api/include/lowlevel/dpu_vpd.h: 141
+if _libs["dpuvpd"].has("dpu_vpd_db_commit_to_device_from_file", "cdecl"):
+    dpu_vpd_db_commit_to_device_from_file = _libs["dpuvpd"].get(
         "dpu_vpd_db_commit_to_device_from_file", "cdecl")
     dpu_vpd_db_commit_to_device_from_file.argtypes = [String, String]
     dpu_vpd_db_commit_to_device_from_file.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 133
-if _libs["libdpuvpd.so"].has("dpu_vpd_add_repair_entry", "cdecl"):
-    dpu_vpd_add_repair_entry = _libs["libdpuvpd.so"].get(
+# api/include/lowlevel/dpu_vpd.h: 151
+if _libs["dpuvpd"].has("dpu_vpd_add_repair_entry", "cdecl"):
+    dpu_vpd_add_repair_entry = _libs["dpuvpd"].get(
         "dpu_vpd_add_repair_entry", "cdecl")
     dpu_vpd_add_repair_entry.argtypes = [
         POINTER(struct_dpu_vpd),
         POINTER(struct_dpu_vpd_repair_entry)]
     dpu_vpd_add_repair_entry.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 144
-if _libs["libdpuvpd.so"].has("dpu_vpd_disable_dpu", "cdecl"):
-    dpu_vpd_disable_dpu = _libs["libdpuvpd.so"].get(
-        "dpu_vpd_disable_dpu", "cdecl")
+# api/include/lowlevel/dpu_vpd.h: 162
+if _libs["dpuvpd"].has("dpu_vpd_disable_dpu", "cdecl"):
+    dpu_vpd_disable_dpu = _libs["dpuvpd"].get("dpu_vpd_disable_dpu", "cdecl")
     dpu_vpd_disable_dpu.argtypes = [
         POINTER(struct_dpu_vpd), uint8_t, uint8_t, uint8_t]
     dpu_vpd_disable_dpu.restype = enum_dpu_vpd_error
 
-# api/include/lowlevel/dpu_vpd.h: 155
-if _libs["libdpuvpd.so"].has("dpu_vpd_enable_dpu", "cdecl"):
-    dpu_vpd_enable_dpu = _libs["libdpuvpd.so"].get(
-        "dpu_vpd_enable_dpu", "cdecl")
+# api/include/lowlevel/dpu_vpd.h: 173
+if _libs["dpuvpd"].has("dpu_vpd_enable_dpu", "cdecl"):
+    dpu_vpd_enable_dpu = _libs["dpuvpd"].get("dpu_vpd_enable_dpu", "cdecl")
     dpu_vpd_enable_dpu.argtypes = [
         POINTER(struct_dpu_vpd), uint8_t, uint8_t, uint8_t]
     dpu_vpd_enable_dpu.restype = enum_dpu_vpd_error

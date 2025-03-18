@@ -115,6 +115,8 @@ u32 ufi_read_bkp_fault_thread_index(struct dpu_rank_t *rank, u8 ci_mask,
 				    u8 *thread);
 u32 ufi_read_dma_fault_thread_index(struct dpu_rank_t *rank, u8 ci_mask,
 				    u8 *thread);
+u32 ufi_write_dma_ctrl_datas(struct dpu_rank_t *rank, u8 ci_mask, u8 address,
+			     u8 *datas);
 u32 ufi_read_mem_fault_thread_index(struct dpu_rank_t *rank, u8 ci_mask,
 				    u8 *thread);
 

@@ -9,9 +9,9 @@ project(librt C)
 set(OBJCOPY llvm-objcopy)
 set(CLANGFORMAT clang-format)
 
-if (DEFINED DPU_TOOLCHAIN_DIRECTORY)
-    set(OBJCOPY ${DPU_TOOLCHAIN_DIRECTORY}/llvm-objcopy)
-    set(CLANGFORMAT ${DPU_TOOLCHAIN_DIRECTORY}/clang-format)
+if (DEFINED tools)
+    set(OBJCOPY ${tools}/llvm-objcopy)
+    set(CLANGFORMAT ${tools}/clang-format)
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

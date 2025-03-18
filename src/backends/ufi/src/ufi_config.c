@@ -36,6 +36,8 @@
 #define WAVEGEN_MUX_HOST_EXPECTED 0x00
 #define WAVEGEN_MUX_DPU_EXPECTED (MUX_DPU_BANK_CTRL | MUX_DPU_WRITE_CTRL)
 
+#define NB_RETRY_RUN_BIT 10
+
 static const char *clock_division_to_string(dpu_clock_division_t clock_division)
 {
 	switch (clock_division) {
@@ -870,8 +872,6 @@ static dpu_error_t dpu_reset_internal_state(struct dpu_rank_t *rank)
 	iram_size_t internal_state_reset_size;
 	uint8_t nr_cis =
 		rank->description->hw.topology.nr_of_control_interfaces;
-	uint8_t nr_dpus =
-		rank->description->hw.topology.nr_of_dpus_per_control_interface;
 	uint8_t nr_threads = rank->description->hw.dpu.nr_of_threads;
 	dpuinstruction_t *internal_state_reset =
 		fetch_internal_reset_program(&internal_state_reset_size);
@@ -879,10 +879,13 @@ static dpu_error_t dpu_reset_internal_state(struct dpu_rank_t *rank)
 		[0 ... DPU_MAX_NR_CIS - 1] = internal_state_reset
 	};
 	uint8_t mask = ALL_CIS;
-	uint8_t mask_all = (1 << nr_dpus) - 1;
 	uint8_t state[DPU_MAX_NR_CIS];
 	bool running;
 	dpu_thread_t each_thread;
+	struct dpu_configuration_slice_info_t *ci_infos =
+		rank->runtime.control_interface.slice_info;
+
+	uint32_t nr_retries = NB_RETRY_RUN_BIT;
 
 	LOG_RANK(VERBOSE, rank, "");
 
@@ -906,14 +909,23 @@ static dpu_error_t dpu_reset_internal_state(struct dpu_rank_t *rank)
 		dpu_slice_id_t each_ci;
 
 		FF(ufi_read_dpu_run(rank, mask, state));
+		nr_retries--;
 
 		running = false;
 		for (each_ci = 0; each_ci < nr_cis; ++each_ci) {
 			if (!CI_MASK_ON(mask, each_ci))
 				continue;
-			running = running || ((state[each_ci] & mask_all) != 0);
+			running = running ||
+				  ((state[each_ci] &
+				    ci_infos[each_ci].enabled_dpus) != 0);
 		}
-	} while (running);
+	} while (running && nr_retries);
+
+	if (nr_retries == 0) {
+		LOG_RANK(WARNING, rank, "ERROR: internal state reset failed");
+		status = DPU_ERR_INTERNAL;
+		goto end;
+	}
 
 end:
 	free(internal_state_reset);
@@ -1036,11 +1048,11 @@ __API_SYMBOL__ dpu_error_t ci_reset_rank(struct dpu_rank_t *rank)
 
 	FF(dpu_set_pc_mode(rank, DPU_PC_MODE_16));
 	FF(dpu_set_stack_direction(rank, true));
-	FF(dpu_reset_internal_state(rank));
 
 	FF(dpu_switch_mux_for_rank(
 		rank, desc->configuration.api_must_switch_mram_mux));
 	FF(dpu_init_groups(rank, all_dpus_are_enabled_save, enabled_dpus_save));
+	FF(dpu_reset_internal_state(rank));
 	FF(dpu_custom_for_rank(rank, DPU_COMMAND_SET_SLICE_INFO, NULL));
 
 end:
